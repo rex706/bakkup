@@ -42,7 +42,7 @@ namespace bakkup
             }
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
-            SavePath = GooglePath + "\\Game Saves";
+            SavePath = GooglePath + "\\bakkups";
 
             //make sure google drive directory exists
             if (!Directory.Exists(GooglePath))
@@ -54,7 +54,7 @@ namespace bakkup
             //make sure save path exists
             if (!Directory.Exists(SavePath))
             {
-                MessageBox.Show("Could not locate Game Saves directory.\nIt will now be created on your Google Drive.");
+                MessageBox.Show("Could not locate bakkups directory.\nIt will now be created on your Google Drive.");
                 Directory.CreateDirectory(SavePath);
             }
 
@@ -87,7 +87,7 @@ namespace bakkup
         private void button1_Click(object sender, EventArgs e)
         {
             int strIdx = selectionString.IndexOf(".") + 2;
-            SettingsPath = SavePath + "\\" + games[selection].Substring(strIdx) + "\\backup_info.txt";
+            SettingsPath = SavePath + "\\" + games[selection].Substring(strIdx) + "\\bakkup.txt";
 
             try
             {   //open the text file using a stream reader
@@ -187,7 +187,7 @@ namespace bakkup
             }
 
             //create settings file
-            using (StreamWriter sw = File.CreateText(newDir + "\\backup_info.txt"))
+            using (StreamWriter sw = File.CreateText(newDir + "\\bakkup.txt"))
             {
                 sw.WriteLine(localSavePath);
                 sw.WriteLine(exePath);
