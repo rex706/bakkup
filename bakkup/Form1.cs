@@ -51,6 +51,13 @@ namespace bakkup
                 Environment.Exit(1);
             }
 
+            //make sure save path exists
+            if (!Directory.Exists(SavePath))
+            {
+                MessageBox.Show("Could not locate Game Saves directory.\nIt will now be created on your Google Drive.");
+                Directory.CreateDirectory(SavePath);
+            }
+
             gameDirectories = Directory.GetDirectories(SavePath);
             games = Directory.GetDirectories(SavePath);
 
@@ -142,7 +149,7 @@ namespace bakkup
             label2.Text = "Cloud Backup Complete!";
         }
 
-        //create new
+        //new
         private void button2_Click(object sender, EventArgs e)
         {
             //prompt user to locate local save folder
