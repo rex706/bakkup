@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 
@@ -15,6 +10,10 @@ namespace bakkup
 {
     public partial class Form1 : Form
     {
+        public string argument = null;
+        public bool argFlag = false;
+        public bool compareFlag = false;
+
         public string[] gameDirectories;
         public string[] games;
 
@@ -28,8 +27,19 @@ namespace bakkup
         public string exePath;
         public string parameters;
 
-        public Form1()
+        public Form1(string[] args)
         {
+            //user specified specific game via shortcut argument
+            if (args.Length > 0)
+            {
+                for (int i = 0; i < args.Length; i++)
+                {
+                    if (i == args.Length - 1) argument += args[i];
+                    else argument += args[i] + " ";
+                }
+                argFlag = true;
+            }
+
             InitializeComponent();
         }
 
@@ -58,25 +68,28 @@ namespace bakkup
                 Directory.CreateDirectory(SavePath);
             }
 
-            gameDirectories = Directory.GetDirectories(SavePath);
-            games = Directory.GetDirectories(SavePath);
+            refreshList();
 
-            //get the folder names instead of the entire path string
-            for (int i = 0; i < gameDirectories.Length; i++)
+            //if user input arguments
+            if(argFlag == true)
             {
-                    games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
-                    games[i] = (i + 1) + ". " + games[i];
+                //make sure argument exists
+                if (Program.compareString(games, argument) == true)
+                {
+                    compareFlag = true;
+                    button1.PerformClick();
+                    MessageBox.Show("Backup Complete!");
+                    Environment.Exit(1);
+                }
+                else
+                {
+                    MessageBox.Show("Argument error!\nCould not find directory for desired game:\n\n" + argument.Substring(1), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Environment.Exit(1);
+                }
             }
-
-            label1.ForeColor = Color.Blue;
-            if (games.Length > 1) label1.Text = games.Length + " game found!";
-            else if (games.Length == 0) label1.Text = "No games found!";
-            else label1.Text = games.Length + " game found!";
-
-            //populate list box
-            listBox1.DataSource = games;
         }
 
+        //update current selected item
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             selectionString = listBox1.GetItemText(listBox1.SelectedItem);
@@ -87,8 +100,18 @@ namespace bakkup
         //select
         private void button1_Click(object sender, EventArgs e)
         {
-            int strIdx = selectionString.IndexOf(".") + 2;
-            SettingsPath = SavePath + "\\" + games[selection].Substring(strIdx) + "\\bakkup.txt";
+            //check if user input argument
+            if (argFlag == true && compareFlag == true)
+            {
+                gameName = argument.Substring(1);
+                SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
+            }
+            else
+            {
+                int strIdx = selectionString.IndexOf(".") + 2;
+                gameName = games[selection].Substring(strIdx);
+                SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
+            }
 
             try
             {   //open the text file using a stream reader
@@ -102,17 +125,17 @@ namespace bakkup
             catch (Exception m)
             {
                 label2.ForeColor = Color.Red;
-                label2.Text = "Loading Failed!";
+                label2.Text = "Local Transfer Failed!";
                 label2.Visible = true;
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(1);
             }
 
             //copy files to local path
-            label2.ForeColor = System.Drawing.Color.Orange;
-            label2.Text = "Copying Files...";
+            label2.ForeColor = Color.Orange;
+            //label2.Text = "Copying Files...";
             label2.Visible = true;
-            Program.DirectoryCopy(SavePath + "\\" + games[selection].Substring(strIdx), localSavePath, true);
+            Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
             label2.ForeColor = Color.Green;
             label2.Text = "Local Transfer Complete!";
 
@@ -145,8 +168,8 @@ namespace bakkup
             //copy files to google drive
             label2.ForeColor = Color.Orange;
             label2.Text = "Copying Files...";
-            Program.DirectoryCopy(localSavePath, SavePath + "\\" + games[selection].Substring(strIdx), true);
-            label2.ForeColor = System.Drawing.Color.Green;
+            Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
+            label2.ForeColor = Color.Green;
             label2.Text = "Cloud Backup Complete!";
         }
 
