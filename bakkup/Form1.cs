@@ -64,15 +64,16 @@ namespace bakkup
             //get the folder names instead of the entire path string
             for (int i = 0; i < gameDirectories.Length; i++)
             {
-                games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
-                games[i] = (i + 1) + ". " + games[i];
+                    games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
+                    games[i] = (i + 1) + ". " + games[i];
             }
 
-            label1.ForeColor = System.Drawing.Color.Blue;
-            if (games.Length > 1) label1.Text = games.Length + " games found!";
+            label1.ForeColor = Color.Blue;
+            if (games.Length > 1) label1.Text = games.Length + " game found!";
             else if (games.Length == 0) label1.Text = "No games found!";
             else label1.Text = games.Length + " game found!";
 
+            //populate list box
             listBox1.DataSource = games;
         }
 
@@ -100,7 +101,7 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                label2.ForeColor = System.Drawing.Color.Red;
+                label2.ForeColor = Color.Red;
                 label2.Text = "Loading Failed!";
                 label2.Visible = true;
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -112,7 +113,7 @@ namespace bakkup
             label2.Text = "Copying Files...";
             label2.Visible = true;
             Program.DirectoryCopy(SavePath + "\\" + games[selection].Substring(strIdx), localSavePath, true);
-            label2.ForeColor = System.Drawing.Color.Green;
+            label2.ForeColor = Color.Green;
             label2.Text = "Local Transfer Complete!";
 
             //get working directory from exePath variable
@@ -142,7 +143,7 @@ namespace bakkup
             }
 
             //copy files to google drive
-            label2.ForeColor = System.Drawing.Color.Orange;
+            label2.ForeColor = Color.Orange;
             label2.Text = "Copying Files...";
             Program.DirectoryCopy(localSavePath, SavePath + "\\" + games[selection].Substring(strIdx), true);
             label2.ForeColor = System.Drawing.Color.Green;
@@ -175,6 +176,9 @@ namespace bakkup
             //prompt user to name new game folder (usually the name of the game)
             gameName = Interaction.InputBox("Enter name of Game:", "bakkup", exeName, Width * 2, Height * 2);
 
+            //prompt for any perameters
+            parameters = Interaction.InputBox("OPTIONAL - Enter any parameters:", "bakkup", "", Width * 2, Height * 2);
+            
             //create new directory
             string newDir = SavePath + "\\" + gameName;
             Directory.CreateDirectory(newDir);
@@ -195,11 +199,11 @@ namespace bakkup
             }
 
             //copy files to google drive
-            label2.ForeColor = System.Drawing.Color.Orange;
+            label2.ForeColor = Color.Orange;
             label2.Text = "Copying Files...";
             label2.Visible = true;
             Program.DirectoryCopy(localSavePath, newDir, true);
-            label2.ForeColor = System.Drawing.Color.Green;
+            label2.ForeColor = Color.Green;
             label2.Text = "Cloud Backup Complete!";
 
             refreshList();
@@ -224,7 +228,7 @@ namespace bakkup
             }
 
             //display number of games found
-            label1.ForeColor = System.Drawing.Color.Blue;
+            label1.ForeColor = Color.Blue;
             if (games.Length > 1)
             {
                 label1.Text = games.Length + " games found!";
