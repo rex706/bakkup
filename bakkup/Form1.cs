@@ -48,7 +48,7 @@ namespace bakkup
             //check for internet
             if (Program.CheckForInternetConnection() == false)
             {
-                MessageBox.Show("WARNING: No Internet connection found. \nSave files cannot be fetched but will still attempt to update on exit. Play anyway?", "ERROR", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on exit. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
             }
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
@@ -133,7 +133,7 @@ namespace bakkup
 
             //copy files to local path
             label2.ForeColor = Color.Orange;
-            //label2.Text = "Copying Files...";
+            label2.Text = "Copying Files...";
             label2.Visible = true;
             Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
             label2.ForeColor = Color.Green;
@@ -238,6 +238,7 @@ namespace bakkup
             refreshList();
         }
 
+        //refresh and populate listbox
         private void refreshList()
         {
             gameDirectories = Directory.GetDirectories(SavePath);
@@ -270,6 +271,92 @@ namespace bakkup
 
             //populate listbox
             listBox1.DataSource = games;
+        }
+
+        //auto load checkbox
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (checkBox1.Checked)
+            {
+                //show select button and hide backup buttons
+                button4.Hide();
+                button5.Hide();
+                button1.Show();
+            }
+            else if (!checkBox1.Checked)
+            {
+                //show backup buttons and hide select button
+                button1.Hide();
+                button4.Show();
+                button5.Show();
+            }
+        }
+
+        //retrieve
+        private void button4_Click(object sender, EventArgs e)
+        {
+            int strIdx = selectionString.IndexOf(".") + 2;
+            gameName = games[selection].Substring(strIdx);
+            SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
+
+            try
+            {   //open the text file using a stream reader
+                using (StreamReader sr = new StreamReader(SettingsPath))
+                {
+                    localSavePath = sr.ReadLine();
+                    exePath = sr.ReadLine();
+                    parameters = sr.ReadLine();
+                }
+}
+            catch (Exception m)
+            {
+                label2.ForeColor = Color.Red;
+                label2.Text = "Local Transfer Failed!";
+                label2.Visible = true;
+                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(1);
+            }
+
+            //copy files to local path
+            label2.ForeColor = Color.Orange;
+            //label2.Text = "Copying Files...";
+            label2.Visible = true;
+            Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
+            label2.ForeColor = Color.Green;
+            label2.Text = "Local Transfer Complete!";
+        }
+
+        //backup
+        private void button5_Click(object sender, EventArgs e)
+        {
+            int strIdx = selectionString.IndexOf(".") + 2;
+            gameName = games[selection].Substring(strIdx);
+            SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
+
+            try
+            {   //open the text file using a stream reader
+                using (StreamReader sr = new StreamReader(SettingsPath))
+                {
+                    localSavePath = sr.ReadLine();
+                    exePath = sr.ReadLine();
+                    parameters = sr.ReadLine();
+                }
+            }
+            catch (Exception m)
+            {
+                label2.ForeColor = Color.Red;
+                label2.Text = "Cloud Backup Failed!";
+                label2.Visible = true;
+                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(1);
+            }
+
+            //copy files to google drive
+            label2.ForeColor = Color.Orange;
+            label2.Text = "Copying Files...";
+            Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
+            label2.ForeColor = Color.Green;
+            label2.Text = "Cloud Backup Complete!";
         }
     }
 }
