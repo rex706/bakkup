@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
+using System.Collections.Generic;
 
 namespace bakkup
 {
@@ -15,7 +16,7 @@ namespace bakkup
         public bool compareFlag = false;
 
         public string[] gameDirectories;
-        public string[] games;
+        public List<string> gameList;
 
         public int selection;
         public string selectionString;
@@ -74,7 +75,7 @@ namespace bakkup
             if(argFlag == true)
             {
                 //make sure argument exists
-                if (Program.compareString(games, argument) == true)
+                if (Program.compareString(gameList, argument) == true)
                 {
                     compareFlag = true;
                     button1.PerformClick();
@@ -109,7 +110,7 @@ namespace bakkup
             else
             {
                 int strIdx = selectionString.IndexOf(".") + 2;
-                gameName = games[selection].Substring(strIdx);
+                gameName = gameList[selection].Substring(strIdx);
                 SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
             }
 
@@ -239,35 +240,47 @@ namespace bakkup
         private void refreshList()
         {
             gameDirectories = Directory.GetDirectories(SavePath);
-            games = Directory.GetDirectories(SavePath);
+            string[] games = new string[gameDirectories.Length];
+            int valid = 0;
 
-            //get the folder names instead of the entire path string
+            //get the folder names instead of the entire path string and check if a bakkup.txt exists to be valid
             for (int i = 0; i < gameDirectories.Length; i++)
             {
-                games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
-                games[i] = (i + 1) + ". " + games[i];
+                if (File.Exists(gameDirectories[i] + "\\bakkup.txt"))
+                {
+                    valid++;
+                    games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
+                    games[i] = (valid) + ". " + games[i];
+                }
+                else games[i] = "@@@";
             }
+
+            gameList = new List<string>(games);
+            gameList.RemoveAll(item => item == "@@@");
 
             //display number of games found
             label1.ForeColor = Color.Blue;
-            if (games.Length > 1)
+            if (gameList.Count > 1)
             {
-                label1.Text = games.Length + " games found!";
+                label1.Text = gameList.Count + " games found!";
                 button1.Enabled = true;
+                checkBox1.Enabled = true;
             }
-            else if (games.Length == 0)
+            else if (gameList.Count == 0)
             {
                 label1.Text = "No games found!";
                 button1.Enabled = false;
+                checkBox1.Enabled = false;
             }
             else
             {
+                label1.Text = gameList.Count + " game found!";
                 button1.Enabled = true;
-                label1.Text = games.Length + " game found!";
+                checkBox1.Enabled = true;
             }
 
             //populate listbox
-            listBox1.DataSource = games;
+            listBox1.DataSource = gameList;
         }
 
         //auto load checkbox
@@ -293,7 +306,7 @@ namespace bakkup
         private void button4_Click(object sender, EventArgs e)
         {
             int strIdx = selectionString.IndexOf(".") + 2;
-            gameName = games[selection].Substring(strIdx);
+            gameName = gameList[selection].Substring(strIdx);
             SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
 
             try
@@ -325,7 +338,7 @@ namespace bakkup
         private void button5_Click(object sender, EventArgs e)
         {
             int strIdx = selectionString.IndexOf(".") + 2;
-            gameName = games[selection].Substring(strIdx);
+            gameName = gameList[selection].Substring(strIdx);
             SettingsPath = SavePath + "\\" + gameName + "\\bakkup.txt";
 
             try
@@ -353,9 +366,10 @@ namespace bakkup
             label1.Text = "Cloud Backup Complete!";
         }
 
+        //version number click
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            System.Diagnostics.Process.Start("https://github.com/rex706/bakkup");
+            Process.Start("https://github.com/rex706/bakkup");
         }
     }
 }

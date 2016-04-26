@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -75,9 +76,9 @@ namespace bakkup
             }
         }
 
-        public static bool compareString(string[] dirInput, string userInput)
+        public static bool compareString(List<string> dirInput, string userInput)
         {
-            for(int i = 0; i < dirInput.Length; i++)
+            for(int i = 0; i < dirInput.Count; i++)
             {
                 int dotIdx = dirInput[i].IndexOf(".") + 2;
                 bool ret = dirInput[i].Substring(dotIdx).SequenceEqual(userInput.Substring(1));
