@@ -124,20 +124,18 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                label2.ForeColor = Color.Red;
-                label2.Text = "Local Transfer Failed!";
-                label2.Visible = true;
+                label1.ForeColor = Color.Red;
+                label1.Text = "Local Transfer Failed!";
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(1);
             }
 
             //copy files to local path
-            label2.ForeColor = Color.Orange;
-            label2.Text = "Copying Files...";
-            label2.Visible = true;
+            label1.ForeColor = Color.Orange;
+            label1.Text = "Copying Files...";
             Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
-            label2.ForeColor = Color.Green;
-            label2.Text = "Local Transfer Complete!";
+            label1.ForeColor = Color.Green;
+            label1.Text = "Local Transfer Complete!";
 
             //get working directory from exePath variable
             int last_slash_idx = exePath.LastIndexOf('\\');
@@ -166,11 +164,11 @@ namespace bakkup
             }
 
             //copy files to google drive
-            label2.ForeColor = Color.Orange;
-            label2.Text = "Copying Files...";
+            label1.ForeColor = Color.Orange;
+            label1.Text = "Copying Files...";
             Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
-            label2.ForeColor = Color.Green;
-            label2.Text = "Cloud Backup Complete!";
+            label1.ForeColor = Color.Green;
+            label1.Text = "Cloud Backup Complete!";
         }
 
         //new
@@ -222,12 +220,11 @@ namespace bakkup
             }
 
             //copy files to google drive
-            label2.ForeColor = Color.Orange;
-            label2.Text = "Copying Files...";
-            label2.Visible = true;
+            label1.ForeColor = Color.Orange;
+            label1.Text = "Copying Files...";
             Program.DirectoryCopy(localSavePath, newDir, true);
-            label2.ForeColor = Color.Green;
-            label2.Text = "Cloud Backup Complete!";
+            label1.ForeColor = Color.Green;
+            label1.Text = "Cloud Backup Complete!";
 
             refreshList();
         }
@@ -278,14 +275,14 @@ namespace bakkup
         {
             if (checkBox1.Checked)
             {
-                //show select button and hide backup buttons
+                //hide backup buttons and show select button
                 button4.Hide();
                 button5.Hide();
                 button1.Show();
             }
             else if (!checkBox1.Checked)
             {
-                //show backup buttons and hide select button
+                //hide select button and show backup buttons
                 button1.Hide();
                 button4.Show();
                 button5.Show();
@@ -310,20 +307,18 @@ namespace bakkup
 }
             catch (Exception m)
             {
-                label2.ForeColor = Color.Red;
-                label2.Text = "Local Transfer Failed!";
-                label2.Visible = true;
+                label1.ForeColor = Color.Red;
+                label1.Text = "Local Transfer Failed!";
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(1);
             }
 
             //copy files to local path
-            label2.ForeColor = Color.Orange;
-            //label2.Text = "Copying Files...";
-            label2.Visible = true;
+            label1.ForeColor = Color.Orange;
+            label1.Text = "Copying Files...";
             Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
-            label2.ForeColor = Color.Green;
-            label2.Text = "Local Transfer Complete!";
+            label1.ForeColor = Color.Green;
+            label1.Text = "Local Transfer Complete!";
         }
 
         //backup
@@ -344,19 +339,18 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                label2.ForeColor = Color.Red;
-                label2.Text = "Cloud Backup Failed!";
-                label2.Visible = true;
+                label1.ForeColor = Color.Red;
+                label1.Text = "Cloud Backup Failed!";
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Environment.Exit(1);
             }
 
             //copy files to google drive
-            label2.ForeColor = Color.Orange;
-            label2.Text = "Copying Files...";
+            label1.ForeColor = Color.Orange;
+            label1.Text = "Copying Files...";
             Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
-            label2.ForeColor = Color.Green;
-            label2.Text = "Cloud Backup Complete!";
+            label1.ForeColor = Color.Green;
+            label1.Text = "Cloud Backup Complete!";
         }
     }
 }
