@@ -85,7 +85,6 @@ namespace bakkup
 
                 if (ret == true) return true;
             }
-
             return false;
         }
     }

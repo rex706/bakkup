@@ -49,7 +49,8 @@ namespace bakkup
             //check for internet
             if (Program.CheckForInternetConnection() == false)
             {
-                MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on exit. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if(answer == DialogResult.No) Environment.Exit(0);
             }
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
@@ -59,13 +60,13 @@ namespace bakkup
             if (!Directory.Exists(GooglePath))
             {
                 MessageBox.Show("Could not locate Google Drive directory.\n Make sure it is installed and signed in, then try again.", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
+                Environment.Exit(0);
             }
 
             //make sure save path exists
             if (!Directory.Exists(SavePath))
             {
-                MessageBox.Show("Could not locate bakkups directory.\nIt will now be created on your Google Drive.");
+                MessageBox.Show("Could not locate bakkups directory.\nIt will now be created on your Google Drive.", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Directory.CreateDirectory(SavePath);
             }
 
@@ -80,12 +81,12 @@ namespace bakkup
                     compareFlag = true;
                     button1.PerformClick();
                     MessageBox.Show("Backup Complete!");
-                    Environment.Exit(1);
+                    Environment.Exit(0);
                 }
                 else
                 {
                     MessageBox.Show("Argument error!\nCould not find directory for desired game:\n\n" + argument.Substring(1), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Environment.Exit(1);
+                    Environment.Exit(0);
                 }
             }
         }
@@ -128,7 +129,7 @@ namespace bakkup
                 label1.ForeColor = Color.Red;
                 label1.Text = "Local Transfer Failed!";
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
+                return;
             }
 
             //copy files to local path
@@ -161,7 +162,7 @@ namespace bakkup
             catch (Exception m)
             {
                 MessageBox.Show (m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
+                return;
             }
 
             //copy files to google drive
@@ -180,6 +181,11 @@ namespace bakkup
             fBrowser.Description = "Select local save folder";
 
             if (fBrowser.ShowDialog() == DialogResult.OK) localSavePath = fBrowser.SelectedPath;
+            else
+            {
+                MessageBox.Show("You must select a valid local save directory!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             //prompt user to locate game exe
             OpenFileDialog exeBrowser = new OpenFileDialog();
@@ -188,6 +194,11 @@ namespace bakkup
             exeBrowser.Multiselect = false;
 
             if (exeBrowser.ShowDialog() == DialogResult.OK) exePath = exeBrowser.FileName;
+            else
+            {
+                MessageBox.Show("You must select a valid game exe!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             //get exe name from path string
             int last_slash_idx = exePath.LastIndexOf('\\');
@@ -197,6 +208,11 @@ namespace bakkup
 
             //prompt user to name new game folder (usually the name of the game)
             gameName = Interaction.InputBox("Enter name of Game:", "bakkup", exeName, Width * 2, Height * 2);
+            while (gameName.Length < 3)
+            {
+                MessageBox.Show("Name must be more than 2 characters long!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                gameName = Interaction.InputBox("Enter name of Game:", "bakkup", exeName, Width * 2, Height * 2);
+            }
 
             //prompt for any perameters
             parameters = Interaction.InputBox("OPTIONAL - Enter any parameters:", "bakkup", "", Width * 2, Height * 2);
@@ -204,13 +220,6 @@ namespace bakkup
             //create new directory
             string newDir = SavePath + "\\" + gameName;
             Directory.CreateDirectory(newDir);
-
-            //check for invalid input/cancels
-            if(newDir == null || exePath == null || gameName == null)
-            {
-                MessageBox.Show("One or more inputs were invalid or cancelled. \nPlease try again.", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
-            }
 
             //create settings file
             using (StreamWriter sw = File.CreateText(newDir + "\\bakkup.txt"))
@@ -262,19 +271,19 @@ namespace bakkup
             label1.ForeColor = Color.Blue;
             if (gameList.Count > 1)
             {
-                label1.Text = gameList.Count + " games found!";
+                label1.Text = gameList.Count + " bakkups found!";
                 button1.Enabled = true;
                 checkBox1.Enabled = true;
             }
             else if (gameList.Count == 0)
             {
-                label1.Text = "No games found!";
+                label1.Text = "No bakkups found!";
                 button1.Enabled = false;
                 checkBox1.Enabled = false;
             }
             else
             {
-                label1.Text = gameList.Count + " game found!";
+                label1.Text = gameList.Count + " bakkup found!";
                 button1.Enabled = true;
                 checkBox1.Enabled = true;
             }
@@ -323,7 +332,7 @@ namespace bakkup
                 label1.ForeColor = Color.Red;
                 label1.Text = "Local Transfer Failed!";
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
+                return;
             }
 
             //copy files to local path
@@ -355,7 +364,7 @@ namespace bakkup
                 label1.ForeColor = Color.Red;
                 label1.Text = "Cloud Backup Failed!";
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(1);
+                return;
             }
 
             //copy files to google drive
@@ -369,7 +378,25 @@ namespace bakkup
         //version number click
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            //open browser to github page
             Process.Start("https://github.com/rex706/bakkup");
+        }
+
+        //remove
+        private void button6_Click(object sender, EventArgs e)
+        {
+            DialogResult answer = MessageBox.Show("Are you sure you want to permanently delete this entry?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+
+            //if yes, delete
+            if (answer == DialogResult.Yes)
+            {
+                int strIdx = selectionString.IndexOf(".") + 2;
+                gameName = gameList[selection].Substring(strIdx);
+
+                Directory.Delete(SavePath + "\\" + gameName, true);
+
+                refreshList();
+            }
         }
     }
 }
