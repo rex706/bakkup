@@ -304,7 +304,7 @@ namespace bakkup
                     exePath = sr.ReadLine();
                     parameters = sr.ReadLine();
                 }
-}
+            }
             catch (Exception m)
             {
                 label1.ForeColor = Color.Red;
@@ -351,6 +351,11 @@ namespace bakkup
             Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
             label1.ForeColor = Color.Green;
             label1.Text = "Cloud Backup Complete!";
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            System.Diagnostics.Process.Start("https://github.com/rex706/bakkup");
         }
     }
 }

@@ -34,10 +34,10 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
+            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.SuspendLayout();
             // 
             // listBox1
@@ -88,15 +88,6 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(9, 8);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(37, 13);
-            this.label3.TabIndex = 8;
-            this.label3.Text = "v1.3.1";
-            // 
             // checkBox1
             // 
             this.checkBox1.AutoSize = true;
@@ -132,15 +123,29 @@
             this.button5.Visible = false;
             this.button5.Click += new System.EventHandler(this.button5_Click);
             // 
+            // linkLabel1
+            // 
+            this.linkLabel1.AutoSize = true;
+            this.linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
+            this.linkLabel1.LinkColor = System.Drawing.Color.Black;
+            this.linkLabel1.Location = new System.Drawing.Point(9, 9);
+            this.linkLabel1.Name = "linkLabel1";
+            this.linkLabel1.Size = new System.Drawing.Size(37, 13);
+            this.linkLabel1.TabIndex = 12;
+            this.linkLabel1.TabStop = true;
+            this.linkLabel1.Tag = "";
+            this.linkLabel1.Text = "v1.3.2";
+            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(250, 243);
+            this.Controls.Add(this.linkLabel1);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
             this.Controls.Add(this.checkBox1);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
             this.Controls.Add(this.button1);
@@ -165,10 +170,10 @@
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Label label3;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.LinkLabel linkLabel1;
     }
 }
 
