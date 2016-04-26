@@ -1,7 +1,7 @@
 # bakkup
 Automatically backup game saves to a Google Drive folder to be accessed from anywhere.
 
-Latest version: 1.3.2
+Latest version: 1.3.3
 
 Make sure to be logged into your Google Drive account
 
