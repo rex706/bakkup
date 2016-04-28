@@ -83,7 +83,7 @@
             // 
             this.button3.Location = new System.Drawing.Point(167, 192);
             this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(73, 40);
+            this.button3.Size = new System.Drawing.Size(75, 40);
             this.button3.TabIndex = 7;
             this.button3.Text = "Refresh";
             this.button3.UseVisualStyleBackColor = true;
@@ -94,7 +94,7 @@
             this.checkBox1.AutoSize = true;
             this.checkBox1.Checked = true;
             this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(91, 170);
+            this.checkBox1.Location = new System.Drawing.Point(92, 170);
             this.checkBox1.Name = "checkBox1";
             this.checkBox1.Size = new System.Drawing.Size(71, 17);
             this.checkBox1.TabIndex = 9;

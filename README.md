@@ -2,6 +2,7 @@
 Automatically backup game saves to a Google Drive folder to be accessed from anywhere. Never be without your most recent save again!
 
 Latest version: 1.4
+![alt tag](http://imgur.com/NTk0dsE)
 
 Make sure to be logged into your Google Drive account
 
