@@ -9,26 +9,34 @@ using System.Collections.Generic;
 
 namespace bakkup
 {
-    public partial class Form1 : Form
+    public partial class MainForm : Form
     {
-        public string argument = null;
-        public bool argFlag = false;
-        public bool compareFlag = false;
+        //Nkosi Note: None of these variables should be declared public.
 
-        public string[] gameDirectories;
-        public List<string> gameList;
+        private string argument = null;
+        private bool argFlag = false;
+        private bool compareFlag = false;
 
-        public int selection;
-        public string selectionString;
-        public string SavePath;
-        public string SettingsPath;
+        private string[] gameDirectories;
+        private List<string> gameList;
 
-        public string gameName;
-        public string localSavePath;
-        public string exePath;
-        public string parameters;
+        private int selection;
+        private string selectionString;
+        private string SavePath;
+        private string SettingsPath;
 
-        public Form1(string[] args)
+        private string gameName;
+        private string localSavePath;
+        private string exePath;
+        private string parameters;
+
+        //Nkosi Note: UI elements should always have a default constructor that takes no parameters.
+        public MainForm()
+        {
+            InitializeComponent();
+        }
+
+        public MainForm(string[] args)
         {
             //user specified specific game via shortcut argument
             if (args.Length > 0)
@@ -44,13 +52,14 @@ namespace bakkup
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void MainForm_Load(object sender, EventArgs e)
         {
             //check for internet
-            if (Program.CheckForInternetConnection() == false)
+            if (Util.CheckForInternetConnection() == false)
             {
                 DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-                if(answer == DialogResult.No) Environment.Exit(0);
+                if (answer == DialogResult.No)
+                    Close(); //Nkosi Note: Closing the window passed to Application.Run will exit the program.
             }
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
@@ -60,7 +69,9 @@ namespace bakkup
             if (!Directory.Exists(GooglePath))
             {
                 MessageBox.Show("Could not locate Google Drive directory.\n Make sure it is installed and signed in, then try again.", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                Environment.Exit(0);
+                //Environment.Exit(0);
+                //Nkosi Note: Closing the window passed to Application.Run will exit the program.
+                Close();
             }
 
             //make sure save path exists
@@ -73,34 +84,34 @@ namespace bakkup
             refreshList();
 
             //if user input arguments
-            if(argFlag == true)
+            if (argFlag == true)
             {
                 //make sure argument exists
-                if (Program.compareString(gameList, argument) == true)
+                if (Util.CompareString(gameList, argument) == true)
                 {
                     compareFlag = true;
-                    button1.PerformClick();
+                    buttonSelect.PerformClick();
                     MessageBox.Show("Backup Complete!");
-                    Environment.Exit(0);
+                    Close();
                 }
                 else
                 {
                     MessageBox.Show("Argument error!\nCould not find directory for desired game:\n\n" + argument.Substring(1), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Environment.Exit(0);
+                    Close();
                 }
             }
         }
 
         //update current selected item
-        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        private void listBoxBakkups_SelectedIndexChanged(object sender, EventArgs e)
         {
-            selectionString = listBox1.GetItemText(listBox1.SelectedItem);
+            selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
             int dotIdx = selectionString.IndexOf(".");
             selection = Int32.Parse(selectionString.Substring(0, dotIdx)) - 1;
         }
 
         //select
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonSelect_Click(object sender, EventArgs e)
         {
             //check if user input argument
             if (argFlag == true && compareFlag == true)
@@ -135,7 +146,7 @@ namespace bakkup
             //copy files to local path
             label1.ForeColor = Color.Orange;
             label1.Text = "Copying Files...";
-            Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
+            Util.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
             label1.ForeColor = Color.Green;
             label1.Text = "Local Transfer Complete!";
 
@@ -161,20 +172,19 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                MessageBox.Show (m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             //copy files to google drive
             label1.ForeColor = Color.Orange;
             label1.Text = "Copying Files...";
-            Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
+            Util.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
             label1.ForeColor = Color.Green;
             label1.Text = "Cloud Backup Complete!";
         }
 
-        //new
-        private void button2_Click(object sender, EventArgs e)
+        private void buttonNewBackup_Click(object sender, EventArgs e)
         {
             //prompt user to locate local save folder
             FolderBrowserDialog fBrowser = new FolderBrowserDialog();
@@ -202,7 +212,7 @@ namespace bakkup
 
             //get exe name from path string
             int last_slash_idx = exePath.LastIndexOf('\\');
-            string exeName = exePath.Substring(last_slash_idx+1);
+            string exeName = exePath.Substring(last_slash_idx + 1);
             int dotIdx = exeName.IndexOf('.');
             exeName = exeName.Substring(0, dotIdx);
 
@@ -216,7 +226,7 @@ namespace bakkup
 
             //prompt for any perameters
             parameters = Interaction.InputBox("OPTIONAL - Enter any parameters:", "bakkup", "", Width * 2, Height * 2);
-            
+
             //create new directory
             string newDir = SavePath + "\\" + gameName;
             Directory.CreateDirectory(newDir);
@@ -232,7 +242,7 @@ namespace bakkup
             //copy files to google drive
             label1.ForeColor = Color.Orange;
             label1.Text = "Copying Files...";
-            Program.DirectoryCopy(localSavePath, newDir, true);
+            Util.DirectoryCopy(localSavePath, newDir, true);
             label1.ForeColor = Color.Green;
             label1.Text = "Cloud Backup Complete!";
 
@@ -240,7 +250,7 @@ namespace bakkup
         }
 
         //refresh
-        private void button3_Click(object sender, EventArgs e)
+        private void buttonRefresh_Click(object sender, EventArgs e)
         {
             refreshList();
         }
@@ -272,47 +282,47 @@ namespace bakkup
             if (gameList.Count > 1)
             {
                 label1.Text = gameList.Count + " bakkups found!";
-                button1.Enabled = true;
-                checkBox1.Enabled = true;
+                buttonSelect.Enabled = true;
+                checkBoxAutoRun.Enabled = true;
             }
             else if (gameList.Count == 0)
             {
                 label1.Text = "No bakkups found!";
-                button1.Enabled = false;
-                checkBox1.Enabled = false;
+                buttonSelect.Enabled = false;
+                checkBoxAutoRun.Enabled = false;
             }
             else
             {
                 label1.Text = gameList.Count + " bakkup found!";
-                button1.Enabled = true;
-                checkBox1.Enabled = true;
+                buttonSelect.Enabled = true;
+                checkBoxAutoRun.Enabled = true;
             }
 
             //populate listbox
-            listBox1.DataSource = gameList;
+            listBoxBakkups.DataSource = gameList;
         }
 
         //auto load checkbox
-        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxAutoRun_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBox1.Checked)
+            if (checkBoxAutoRun.Checked)
             {
                 //hide backup buttons and show select button
-                button4.Hide();
-                button5.Hide();
-                button1.Show();
+                buttonRetrieve.Hide();
+                buttonBackup.Hide();
+                buttonSelect.Show();
             }
-            else if (!checkBox1.Checked)
+            else if (!checkBoxAutoRun.Checked)
             {
                 //hide select button and show backup buttons
-                button1.Hide();
-                button4.Show();
-                button5.Show();
+                buttonSelect.Hide();
+                buttonRetrieve.Show();
+                buttonBackup.Show();
             }
         }
 
         //retrieve
-        private void button4_Click(object sender, EventArgs e)
+        private void buttonRetrieve_Click(object sender, EventArgs e)
         {
             int strIdx = selectionString.IndexOf(".") + 2;
             gameName = gameList[selection].Substring(strIdx);
@@ -338,13 +348,13 @@ namespace bakkup
             //copy files to local path
             label1.ForeColor = Color.Orange;
             label1.Text = "Copying Files...";
-            Program.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
+            Util.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
             label1.ForeColor = Color.Green;
             label1.Text = "Local Transfer Complete!";
         }
 
         //backup
-        private void button5_Click(object sender, EventArgs e)
+        private void buttonBackup_Click(object sender, EventArgs e)
         {
             int strIdx = selectionString.IndexOf(".") + 2;
             gameName = gameList[selection].Substring(strIdx);
@@ -370,20 +380,20 @@ namespace bakkup
             //copy files to google drive
             label1.ForeColor = Color.Orange;
             label1.Text = "Copying Files...";
-            Program.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
+            Util.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
             label1.ForeColor = Color.Green;
             label1.Text = "Cloud Backup Complete!";
         }
 
         //version number click
-        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void linkLabelVersion_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
             //open browser to github page
             Process.Start("https://github.com/rex706/bakkup");
         }
 
         //remove
-        private void button6_Click(object sender, EventArgs e)
+        private void buttonRemove_Click(object sender, EventArgs e)
         {
             DialogResult answer = MessageBox.Show("Are you sure you want to permanently delete this entry?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 

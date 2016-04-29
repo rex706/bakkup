@@ -1,6 +1,6 @@
 ﻿namespace bakkup
 {
-    partial class Form1
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,27 +28,27 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.listBox1 = new System.Windows.Forms.ListBox();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
+            this.listBoxBakkups = new System.Windows.Forms.ListBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
-            this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.button6 = new System.Windows.Forms.Button();
+            this.buttonSelect = new System.Windows.Forms.Button();
+            this.buttonNewBackup = new System.Windows.Forms.Button();
+            this.buttonRefresh = new System.Windows.Forms.Button();
+            this.checkBoxAutoRun = new System.Windows.Forms.CheckBox();
+            this.buttonRetrieve = new System.Windows.Forms.Button();
+            this.buttonBackup = new System.Windows.Forms.Button();
+            this.linkLabelVersion = new System.Windows.Forms.LinkLabel();
+            this.buttonRemove = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // listBox1
+            // listBoxBakkups
             // 
-            this.listBox1.FormattingEnabled = true;
-            this.listBox1.Location = new System.Drawing.Point(49, 28);
-            this.listBox1.Name = "listBox1";
-            this.listBox1.Size = new System.Drawing.Size(153, 134);
-            this.listBox1.TabIndex = 0;
-            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
+            this.listBoxBakkups.FormattingEnabled = true;
+            this.listBoxBakkups.Location = new System.Drawing.Point(49, 28);
+            this.listBoxBakkups.Name = "listBoxBakkups";
+            this.listBoxBakkups.Size = new System.Drawing.Size(153, 134);
+            this.listBoxBakkups.TabIndex = 0;
+            this.listBoxBakkups.SelectedIndexChanged += new System.EventHandler(this.listBoxBakkups_SelectedIndexChanged);
             // 
             // label1
             // 
@@ -61,116 +61,116 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(88, 192);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 40);
-            this.button1.TabIndex = 4;
-            this.button1.Text = "Select";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.buttonSelect.Location = new System.Drawing.Point(88, 192);
+            this.buttonSelect.Name = "buttonSelect";
+            this.buttonSelect.Size = new System.Drawing.Size(75, 40);
+            this.buttonSelect.TabIndex = 4;
+            this.buttonSelect.Text = "Select";
+            this.buttonSelect.UseVisualStyleBackColor = true;
+            this.buttonSelect.Click += new System.EventHandler(this.buttonSelect_Click);
             // 
-            // button2
+            // buttonNewBackup
             // 
-            this.button2.Location = new System.Drawing.Point(9, 192);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 40);
-            this.button2.TabIndex = 5;
-            this.button2.Text = "New";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.buttonNewBackup.Location = new System.Drawing.Point(9, 192);
+            this.buttonNewBackup.Name = "buttonNewBackup";
+            this.buttonNewBackup.Size = new System.Drawing.Size(75, 40);
+            this.buttonNewBackup.TabIndex = 5;
+            this.buttonNewBackup.Text = "New";
+            this.buttonNewBackup.UseVisualStyleBackColor = true;
+            this.buttonNewBackup.Click += new System.EventHandler(this.buttonNewBackup_Click);
             // 
-            // button3
+            // buttonRefresh
             // 
-            this.button3.Location = new System.Drawing.Point(167, 192);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 40);
-            this.button3.TabIndex = 7;
-            this.button3.Text = "Refresh";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.buttonRefresh.Location = new System.Drawing.Point(167, 192);
+            this.buttonRefresh.Name = "buttonRefresh";
+            this.buttonRefresh.Size = new System.Drawing.Size(75, 40);
+            this.buttonRefresh.TabIndex = 7;
+            this.buttonRefresh.Text = "Refresh";
+            this.buttonRefresh.UseVisualStyleBackColor = true;
+            this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
             // 
-            // checkBox1
+            // checkBoxAutoRun
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(92, 170);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(71, 17);
-            this.checkBox1.TabIndex = 9;
-            this.checkBox1.Text = "Auto-Run";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
+            this.checkBoxAutoRun.AutoSize = true;
+            this.checkBoxAutoRun.Checked = true;
+            this.checkBoxAutoRun.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBoxAutoRun.Location = new System.Drawing.Point(92, 170);
+            this.checkBoxAutoRun.Name = "checkBoxAutoRun";
+            this.checkBoxAutoRun.Size = new System.Drawing.Size(71, 17);
+            this.checkBoxAutoRun.TabIndex = 9;
+            this.checkBoxAutoRun.Text = "Auto-Run";
+            this.checkBoxAutoRun.UseVisualStyleBackColor = true;
+            this.checkBoxAutoRun.CheckedChanged += new System.EventHandler(this.checkBoxAutoRun_CheckedChanged);
             // 
-            // button4
+            // buttonRetrieve
             // 
-            this.button4.Location = new System.Drawing.Point(88, 189);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(75, 23);
-            this.button4.TabIndex = 10;
-            this.button4.Text = "Retrieve";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Visible = false;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
+            this.buttonRetrieve.Location = new System.Drawing.Point(88, 189);
+            this.buttonRetrieve.Name = "buttonRetrieve";
+            this.buttonRetrieve.Size = new System.Drawing.Size(75, 23);
+            this.buttonRetrieve.TabIndex = 10;
+            this.buttonRetrieve.Text = "Retrieve";
+            this.buttonRetrieve.UseVisualStyleBackColor = true;
+            this.buttonRetrieve.Visible = false;
+            this.buttonRetrieve.Click += new System.EventHandler(this.buttonRetrieve_Click);
             // 
-            // button5
+            // buttonBackup
             // 
-            this.button5.Location = new System.Drawing.Point(88, 212);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 11;
-            this.button5.Text = "Backup";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Visible = false;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            this.buttonBackup.Location = new System.Drawing.Point(88, 212);
+            this.buttonBackup.Name = "buttonBackup";
+            this.buttonBackup.Size = new System.Drawing.Size(75, 23);
+            this.buttonBackup.TabIndex = 11;
+            this.buttonBackup.Text = "Backup";
+            this.buttonBackup.UseVisualStyleBackColor = true;
+            this.buttonBackup.Visible = false;
+            this.buttonBackup.Click += new System.EventHandler(this.buttonBackup_Click);
             // 
-            // linkLabel1
+            // linkLabelVersion
             // 
-            this.linkLabel1.AutoSize = true;
-            this.linkLabel1.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
-            this.linkLabel1.LinkColor = System.Drawing.Color.Black;
-            this.linkLabel1.Location = new System.Drawing.Point(9, 9);
-            this.linkLabel1.Name = "linkLabel1";
-            this.linkLabel1.Size = new System.Drawing.Size(28, 13);
-            this.linkLabel1.TabIndex = 12;
-            this.linkLabel1.TabStop = true;
-            this.linkLabel1.Tag = "";
-            this.linkLabel1.Text = "v1.4";
-            this.linkLabel1.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabel1_LinkClicked);
+            this.linkLabelVersion.AutoSize = true;
+            this.linkLabelVersion.LinkBehavior = System.Windows.Forms.LinkBehavior.NeverUnderline;
+            this.linkLabelVersion.LinkColor = System.Drawing.Color.Black;
+            this.linkLabelVersion.Location = new System.Drawing.Point(9, 9);
+            this.linkLabelVersion.Name = "linkLabelVersion";
+            this.linkLabelVersion.Size = new System.Drawing.Size(28, 13);
+            this.linkLabelVersion.TabIndex = 12;
+            this.linkLabelVersion.TabStop = true;
+            this.linkLabelVersion.Tag = "";
+            this.linkLabelVersion.Text = "v1.4";
+            this.linkLabelVersion.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelVersion_LinkClicked);
             // 
-            // button6
+            // buttonRemove
             // 
-            this.button6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.button6.Location = new System.Drawing.Point(88, 238);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(75, 40);
-            this.button6.TabIndex = 13;
-            this.button6.Text = "Remove";
-            this.button6.UseVisualStyleBackColor = false;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
+            this.buttonRemove.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.buttonRemove.Location = new System.Drawing.Point(88, 238);
+            this.buttonRemove.Name = "buttonRemove";
+            this.buttonRemove.Size = new System.Drawing.Size(75, 40);
+            this.buttonRemove.TabIndex = 13;
+            this.buttonRemove.Text = "Remove";
+            this.buttonRemove.UseVisualStyleBackColor = false;
+            this.buttonRemove.Click += new System.EventHandler(this.buttonRemove_Click);
             // 
-            // Form1
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(250, 285);
-            this.Controls.Add(this.button6);
-            this.Controls.Add(this.linkLabel1);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.checkBox1);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.buttonRemove);
+            this.Controls.Add(this.linkLabelVersion);
+            this.Controls.Add(this.buttonBackup);
+            this.Controls.Add(this.buttonRetrieve);
+            this.Controls.Add(this.checkBoxAutoRun);
+            this.Controls.Add(this.buttonRefresh);
+            this.Controls.Add(this.buttonNewBackup);
+            this.Controls.Add(this.buttonSelect);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.listBox1);
+            this.Controls.Add(this.listBoxBakkups);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "Form1";
+            this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "bakkup";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -178,16 +178,16 @@
 
         #endregion
 
-        private System.Windows.Forms.ListBox listBox1;
+        private System.Windows.Forms.ListBox listBoxBakkups;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button5;
-        private System.Windows.Forms.LinkLabel linkLabel1;
-        private System.Windows.Forms.Button button6;
+        private System.Windows.Forms.Button buttonSelect;
+        private System.Windows.Forms.Button buttonNewBackup;
+        private System.Windows.Forms.Button buttonRefresh;
+        private System.Windows.Forms.CheckBox checkBoxAutoRun;
+        private System.Windows.Forms.Button buttonRetrieve;
+        private System.Windows.Forms.Button buttonBackup;
+        private System.Windows.Forms.LinkLabel linkLabelVersion;
+        private System.Windows.Forms.Button buttonRemove;
     }
 }
 

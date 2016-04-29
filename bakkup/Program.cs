@@ -1,4 +1,12 @@
-﻿using System;
+﻿/*
+ * Nkosi Notes:
+ * 1. UI elements that you are making use of should always have a useful name. "button1, button2, button3" etc do not
+ * tell you what the purpose of the control is.
+ * 2. C# has a different style than Java. Don't forget that you do not camel case name functions. Each first letter of
+ * a word in a function should be capital.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -18,74 +26,7 @@ namespace bakkup
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1(args));
-        }
-
-        public static bool CheckForInternetConnection()
-        {
-            try
-            {
-                using (var client = new WebClient())
-                {
-                    using (var stream = client.OpenRead("http://www.google.com"))
-                    {
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public static void DirectoryCopy(string sourceDirName, string destDirName, bool copySubDirs)
-        {
-            //get the subdirectories for the specified directory.
-            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
-
-            if (!dir.Exists)
-            {
-                throw new DirectoryNotFoundException("Source directory does not exist or could not be found: "+ sourceDirName);
-            }
-
-            DirectoryInfo[] dirs = dir.GetDirectories();
-
-            //if the destination directory doesn't exist, create it.
-            if (!Directory.Exists(destDirName))
-            {
-                Directory.CreateDirectory(destDirName);
-            }
-
-            //get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
-            foreach (FileInfo file in files)
-            {
-                string temppath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(temppath, true);
-            }
-
-            //if copying subdirectories, copy them and their contents to new location.
-            if (copySubDirs)
-            {
-                foreach (DirectoryInfo subdir in dirs)
-                {
-                    string temppath = Path.Combine(destDirName, subdir.Name);
-                    DirectoryCopy(subdir.FullName, temppath, copySubDirs);
-                }
-            }
-        }
-
-        public static bool compareString(List<string> dirInput, string userInput)
-        {
-            for(int i = 0; i < dirInput.Count; i++)
-            {
-                int dotIdx = dirInput[i].IndexOf(".") + 2;
-                bool ret = dirInput[i].Substring(dotIdx).SequenceEqual(userInput.Substring(1));
-
-                if (ret == true) return true;
-            }
-            return false;
+            Application.Run(new MainForm(args));
         }
     }
 }
