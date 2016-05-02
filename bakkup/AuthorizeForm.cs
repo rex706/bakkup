@@ -6,8 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
-using DotNetOpenAuth.OAuth2;
 
 namespace bakkup
 {
@@ -16,18 +16,58 @@ namespace bakkup
     /// </summary>
     public partial class AuthorizeForm : Form
     {
-        private ClientAuthorizationView _loginControl;
+        private readonly WebBrowser _loginBrowser;
+        private List<string> _closingParamsHint;
 
         public AuthorizeForm()
         {
             InitializeComponent();
 
-            //Add the DotNetOpenAuth authorization control.
-            _loginControl = new ClientAuthorizationView();
-            _loginControl.Dock = DockStyle.Fill;
-            Controls.Add(_loginControl);
+            _loginBrowser = new WebBrowser();
+            _loginBrowser.Dock = DockStyle.Fill;
+            _loginBrowser.IsWebBrowserContextMenuEnabled = false;
+            _loginBrowser.Navigated += _loginBrowser_Navigated;
+            Controls.Add(_loginBrowser);
+
+            AuthorizationRedirectUrl = null;
         }
 
-        public ClientAuthorizationView LoginControl => _loginControl;
+        public void RequestAuthorization(string authorizationUrl, List<string> closingParamsHint)
+        {
+            //Provide a list of url parameters this window should look for to let it know the user has completed the
+            //login process and this window should close.
+            this._closingParamsHint = closingParamsHint;
+            //Navigate to the requested page.
+            _loginBrowser.Navigate(authorizationUrl);
+        }
+
+        private void _loginBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
+        {
+            //Check the parameters in the url. Do nothing if there is a response_type parameter.
+            var query = HttpUtility.ParseQueryString(new UriBuilder(e.Url).Query);
+            //Do nothing if the current url does not contain any parameters in the closingParamsHint list of strings.
+            foreach (var param in _closingParamsHint)
+            {
+                if (query[param] != null)
+                {
+                    //The window should close. This url represents the completion of the login process.
+
+                    //Set AuthorizationRedirectUrl to whatever the page has redirected to once the user has given access
+                    //or denied access to this app.
+                    AuthorizationRedirectUrl = e.Url.ToString();
+                    //Close the window.
+                    Close();
+                    return;
+                }
+            }
+
+            
+        }
+
+        /// <summary>
+        /// The url containing the resulting access token or any other necessary parameter on redirect from the
+        /// login page.
+        /// </summary>
+        public string AuthorizationRedirectUrl { get; private set; }
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Windows.Forms;
 
 namespace bakkup.Clients
@@ -13,32 +14,76 @@ namespace bakkup.Clients
         private const string ClientSecretId = "tlPLlN7xpndsZUZc0Oo0FDfc";
         private const string AuthUri = "https://accounts.google.com/o/oauth2/auth";
         private const string TokenUri = "https://accounts.google.com/o/oauth2/token";
+        private const string Redirect = "http://localhost";
 
-        public override string AuthorizationEndpoint => AuthUri;
+        protected override string AuthorizationEndpoint => AuthUri;
 
-        public override string ClientId => Client;
+        protected override string ClientId => Client;
 
-        public override string ClientSecret => ClientSecretId;
+        protected override string ClientSecret => ClientSecretId;
 
-        public override string TokenEndpoint => TokenUri;
+        protected override string TokenEndpoint => TokenUri;
 
-        public override string ProviderName => "Google Drive";
+        protected override string ProviderName => "Google Drive";
+
+        protected override string RedirectUri => Redirect;
+
+        protected override List<string> AuthorizationFormCloseParams
+        {
+            get { return new List<string>() {"error_code", "code"}; }
+        }
 
         public GoogleDriveOAuthClient(Form parentWindow) : base(parentWindow)
         {
             
         }
 
-        public override async Task PerformLogin()
+        public override async Task<bool> PerformLogin()
         {
-            List<KeyValuePair<string, string>> authorizationParameters = new List<KeyValuePair<string, string>>();
-            List<String> scopes = new List<string>();
+            var authorizationParameters = new List<KeyValuePair<string, string>>();
+            var scopes = new List<string>();
             
             //Google drive requires the full access scope.
             scopes.Add("https://www.googleapis.com/auth/drive");
 
+            //Google drive requires a parameter called "nonce" that is a cryptographically strong string.
+            authorizationParameters.Add(new KeyValuePair<string, string>("nonce", GenerateRandomString()));
+
             //Initiate a login request.
-            var authorizeUrl = await this.RequestAuthorizationUrl(scopes, authorizationParameters);
+            var authorizeUrl = RequestAuthorizationUrl(scopes, authorizationParameters);
+
+            //Make sure authorizeUrl is not null. It is null if something went wrong.
+            if (authorizeUrl == null)
+            {
+                return false;
+            }
+
+            //Check the parameters of the url. Google Drive puts an "error_code" parameter upon failure, set to
+            //access_denied if the user denies this app access to their Google Drive. Otherwise, it sets a 
+            //"" parameter with the 
+            var builder = new UriBuilder(authorizeUrl);
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            if (query["error_code"] != null)
+            {
+                //Error while trying to access user's account.
+                if (query["error_code"].StartsWith("access_denied"))
+                {
+                    return false;
+                }
+            }
+            if (query["code"] == null)
+            {
+                //Something went wrong because there is no "code" parameter.
+                return false;
+            }
+
+            //Get the authorization code.
+            var code = query["code"];
+
+            //Now, using this code, request an access token.
+            await RequestAccessToken(code);
+
+            return true;
         }
     }
 }

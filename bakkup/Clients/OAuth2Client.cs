@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
@@ -11,32 +12,65 @@ namespace bakkup.Clients
 {
     public abstract class OAuth2Client
     {
-        public abstract string AuthorizationEndpoint { get; }
+        /// <summary>
+        /// The authorization endpoint url.
+        /// </summary>
+        protected abstract string AuthorizationEndpoint { get; }
 
-        public abstract string TokenEndpoint { get; }
+        /// <summary>
+        /// The token endpoint url.
+        /// </summary>
+        protected abstract string TokenEndpoint { get; }
 
-        public abstract string ClientId { get; }
+        /// <summary>
+        /// The client ID for the app registered with the web service API.
+        /// </summary>
+        protected abstract string ClientId { get; }
 
-        public abstract string ClientSecret { get; }
+        /// <summary>
+        /// The client secret for the app provided by the web service API.
+        /// </summary>
+        protected abstract string ClientSecret { get; }
 
-        public abstract string ProviderName { get; }
+        /// <summary>
+        /// The name of the provider.
+        /// </summary>
+        protected abstract string ProviderName { get; }
 
-        public abstract Task PerformLogin();
+        /// <summary>
+        /// The url to redirect to after the user logins to the website and gives permission to this app.
+        /// </summary>
+        protected abstract string RedirectUri { get; }
 
-        private Form _parentWindow;
+        /// <summary>
+        /// A list of url parameters AuthorizeForm should look for so it can close once the user has finished
+        /// the login process.
+        /// </summary>
+        protected abstract List<string> AuthorizationFormCloseParams { get; }
+
+        /// <summary>
+        /// Runs the login process for this OAuth2Client instance.
+        /// </summary>
+        /// <returns>A value indicating whether or not the login process was successful.</returns>
+        public abstract Task<bool> PerformLogin();
+
+        private readonly Form _parentWindow;
+        private UserAgentClient _oAuthClient;
 
         protected OAuth2Client(Form parentWindow)
         {
             _parentWindow = parentWindow;
         }
 
-        protected async Task<string> RequestAuthorizationUrl(List<String> scopes, 
+        protected void InitializeClient()
+        {
+            _oAuthClient = new UserAgentClient(MakeServerDescription(), ClientId, ClientSecret);
+        }
+
+        protected string RequestAuthorizationUrl(List<String> scopes, 
             List<KeyValuePair<string, string>> extraParams)
         {
-            var description = new AuthorizationServerDescription();
-            description.ProtocolVersion = ProtocolVersion.V20;
-            description.AuthorizationEndpoint = new Uri(AuthorizationEndpoint);
-            description.TokenEndpoint = new Uri(TokenEndpoint);
+            var description = _oAuthClient.AuthorizationServer;
 
             if (extraParams.Count > 0)
             {
@@ -53,27 +87,52 @@ namespace bakkup.Clients
             }
             
 
-            var client = new UserAgentClient(description, ClientId, ClientSecret);
-            var userAuthUrl = client.RequestUserAuthorization(scopes);
+            var userAuthUrl = _oAuthClient.RequestUserAuthorization(scopes, null, new Uri(RedirectUri));
             
             //Use DotNetOpenAuth's built in web browser window to allow the user to verify authorization.
             var loginWindow = new AuthorizeForm();
             loginWindow.Text = "Login To " + ProviderName;
-            loginWindow.LoginControl.Client = client;
+            loginWindow.RequestAuthorization(userAuthUrl.ToString(), AuthorizationFormCloseParams);
             loginWindow.ShowDialog(_parentWindow);
-            
 
-            return null;
+            //Return the authorization redirect url. Handling of parameters in this url is done by classes that
+            //extend this class.
+            return loginWindow.AuthorizationRedirectUrl;
         }
 
         protected async Task<bool> RequestAccessToken(string authorizationCode)
         {
+            
             return true;
         }
 
         protected async Task<bool> RequestAccessTokenWithRefreshToken(string refreshToken)
         {
             return true;
+        }
+
+        /// <summary>
+        /// Generates a cryptographically strong random string.
+        /// </summary>
+        /// <returns>A random string.</returns>
+        protected static string GenerateRandomString()
+        {
+            using (RandomNumberGenerator rng = new RNGCryptoServiceProvider())
+            {
+                byte[] data = new byte[64];
+                rng.GetBytes(data);
+
+                return Convert.ToBase64String(data);
+            }
+        }
+
+        private AuthorizationServerDescription MakeServerDescription()
+        {
+            var description = new AuthorizationServerDescription();
+            description.ProtocolVersion = ProtocolVersion.V20;
+            description.AuthorizationEndpoint = new Uri(AuthorizationEndpoint);
+            description.TokenEndpoint = new Uri(TokenEndpoint);
+            return description;
         }
     }
 }
