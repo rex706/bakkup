@@ -20,8 +20,9 @@ namespace bakkup
 
         private async void buttonStartLogin_Click(object sender, EventArgs e)
         {
-            GoogleDriveOAuthClient client = new GoogleDriveOAuthClient(this);
+            GoogleDriveClient client = new GoogleDriveClient(this);
             await client.PerformLogin();
+            Console.WriteLine("Done");
         }
     }
 }

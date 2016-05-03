@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,13 +9,16 @@ using System.Windows.Forms;
 
 namespace bakkup.Clients
 {
-    public class GoogleDriveOAuthClient : OAuth2Client
+    /// <summary>
+    /// Represents a Google Drive OAuth2 client.
+    /// </summary>
+    public class GoogleDriveClient : OAuth2Client
     {
         private const string Client = "315452663633-0onrc7415g98gupp59gbld9c1s8p60h3.apps.googleusercontent.com";
         private const string ClientSecretId = "tlPLlN7xpndsZUZc0Oo0FDfc";
-        private const string AuthUri = "https://accounts.google.com/o/oauth2/auth";
-        private const string TokenUri = "https://accounts.google.com/o/oauth2/token";
-        private const string Redirect = "http://localhost";
+        private const string AuthUri = "https://accounts.google.com/o/oauth2/v2/auth";
+        private const string TokenUri = "https://www.googleapis.com/oauth2/v4/token";
+        private const string Redirect = "http://localhost/";
 
         protected override string AuthorizationEndpoint => AuthUri;
 
@@ -30,29 +34,29 @@ namespace bakkup.Clients
 
         protected override List<string> AuthorizationFormCloseParams
         {
-            get { return new List<string>() {"error_code", "code"}; }
+            get { return new List<string>() { "error_code", "code" }; }
         }
 
-        public GoogleDriveOAuthClient(Form parentWindow) : base(parentWindow)
+        public GoogleDriveClient(Form parentWindow) : base(parentWindow)
         {
             
         }
 
         public override async Task<bool> PerformLogin()
         {
-            var authorizationParameters = new List<KeyValuePair<string, string>>();
+            var authorizationParameters = new NameValueCollection();
             var scopes = new List<string>();
-            
+
             //Google drive requires the full access scope.
             scopes.Add("https://www.googleapis.com/auth/drive");
 
             //Google drive requires a parameter called "nonce" that is a cryptographically strong string.
-            authorizationParameters.Add(new KeyValuePair<string, string>("nonce", GenerateRandomString()));
+            authorizationParameters.Add("nonce", GenerateRandomString());
 
             //Initiate a login request.
-            var authorizeUrl = RequestAuthorizationUrl(scopes, authorizationParameters);
+            var authorizeUrl = RequestAuthorization(scopes, authorizationParameters);
 
-            //Make sure authorizeUrl is not null. It is null if something went wrong.
+            //Make sure authorizeUrl is not null. If it is null then something went wrong.
             if (authorizeUrl == null)
             {
                 return false;
@@ -68,22 +72,29 @@ namespace bakkup.Clients
                 //Error while trying to access user's account.
                 if (query["error_code"].StartsWith("access_denied"))
                 {
+                    LastError = "User denied access.";
                     return false;
                 }
             }
             if (query["code"] == null)
             {
                 //Something went wrong because there is no "code" parameter.
+                LastError = "Google Drive did not provide \"code\" parameter in response.";
                 return false;
             }
 
-            //Get the authorization code.
-            var code = query["code"];
+            //Construct the parameters for getting an access token.
+            var accessTokenParams = new NameValueCollection()
+            {
+                {"grant_type", "authorization_code" },
+                {"code", query["code"] },
+                {"redirect_uri", RedirectUri },
+                {"client_id", ClientId },
+                {"client_secret", ClientSecret }
+            };
 
-            //Now, using this code, request an access token.
-            await RequestAccessToken(code);
-
-            return true;
+            //Now, using the above parameters, request an access token.
+            return await RequestAccessToken(accessTokenParams);
         }
     }
 }
