@@ -5,25 +5,59 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using bakkup.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace bakkup.Clients
 {
     /// <summary>
-    /// Represents an OAuth2 client. This should be extended by classes to implement the OAuth2 login flow for
+    /// Represents different kinds of errors that can occur in the OAuth2Client.
+    /// </summary>
+    public enum OAuthClientResult
+    {
+        /// <summary>
+        /// The operation was successful.
+        /// </summary>
+        Success = 0,
+        /// <summary>
+        /// An error related to authorization occurred.
+        /// </summary>
+        Unauthorized = 1,
+        /// <summary>
+        /// There was some HTTP error.
+        /// </summary>
+        HttpError = 2,
+        /// <summary>
+        /// The user cancelled the operation.
+        /// </summary>
+        UserCancelled = 3,
+        /// <summary>
+        /// An error has occurred that is not explicitly handled in code.
+        /// </summary>
+        UnhandledError = 4,
+        /// <summary>
+        /// An unexpected error has occurred. This usually means the server being contacted did something
+        /// strange.
+        /// </summary>
+        UnexpectedError = 5
+    }
+
+    /// <summary>
+    /// Represents an OAuth2 web client. This should be extended by classes to implement the OAuth2 login flow for
     /// different websites, such as Google Drive, OneDrive, DropBox, etc.
     /// </summary>
     public abstract class OAuth2Client
     {
-        private readonly Form _parentWindow;
 
-        #region Protected Properties
+        #region Protected Abstract Properties
 
         /// <summary>
         /// The authorization endpoint url.
@@ -34,16 +68,6 @@ namespace bakkup.Clients
         /// The token endpoint url.
         /// </summary>
         protected abstract string TokenEndpoint { get; }
-
-        /// <summary>
-        /// The client ID for the app registered with the web service API.
-        /// </summary>
-        protected abstract string ClientId { get; }
-
-        /// <summary>
-        /// The client secret for the app provided by the web service API.
-        /// </summary>
-        protected abstract string ClientSecret { get; }
 
         /// <summary>
         /// The name of the provider.
@@ -78,16 +102,40 @@ namespace bakkup.Clients
 
         #endregion
 
+        #region Protected Abstract Methods
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        /// Gets an instance of the WebClient that is being used to send and receive requests.
+        /// </summary>
+        protected HttpClient WebClient { get; }
+
+        /// <summary>
+        /// The client ID for the app registered with the web service API. This is loaded from the ClientData.json
+        /// file.
+        /// </summary>
+        protected string ClientId { get; private set; }
+
+        /// <summary>
+        /// The client secret for the app provided by the web service API. This is loaded from the ClientData.json
+        /// file.
+        /// </summary>
+        protected string ClientSecret { get; private set; }
+
+        #endregion
+
         #region Protected Methods
 
         /// <summary>
-        /// Constructor for the OAuth2Client. Takes in the parent window so the AuthorizeForm window can be placed
-        /// on top of the main window.
+        /// Protecetd default constructor.
         /// </summary>
-        /// <param name="parentWindow">The parent window the AuthorizeForm should be placed on top of.</param>
-        protected OAuth2Client(Form parentWindow)
+        protected OAuth2Client()
         {
-            _parentWindow = parentWindow;
+            WebClient = new HttpClient();
+            IsLoggedIn = false;
         }
 
         /// <summary>
@@ -124,7 +172,7 @@ namespace bakkup.Clients
             }
             //Add any extra parameters.
             if (extraParams != null && extraParams.Count > 0)
-                parameters.Add(extraParams);          
+                parameters.Add(extraParams);
 
             //Create the authorization request url.
             string requestUrl = ConstructUri(AuthorizationEndpoint, parameters).ToString();
@@ -136,7 +184,7 @@ namespace bakkup.Clients
             loginWindow.RequestAuthorization(requestUrl, AuthorizationFormCloseParams);
             //Show the window as a dialog to block application use until the user gives access to this app, denies
             //access to this app, or chooses to just close the window (also denying access to this app).
-            loginWindow.ShowDialog(_parentWindow);
+            loginWindow.ShowDialog();
 
             //Return the authorization redirect url. Handling of parameters in this url is done by classes that
             //extend this class.
@@ -154,86 +202,64 @@ namespace bakkup.Clients
             //Create the url parameter data using some LINQ.
             string postData = string.Join("&",
                 parameters.AllKeys.Select(k => k + "=" + HttpUtility.UrlEncode(parameters[k])));
-            
+
             //Convert the data into a byte array.
             byte[] postBytes = Encoding.UTF8.GetBytes(postData);
 
             //Create the HTTP request for the access token information.
-            var webRequest = (HttpWebRequest)WebRequest.Create(TokenEndpoint);
-            webRequest.Method = "POST";
-            webRequest.ContentType = "application/x-www-form-urlencoded";
-            webRequest.ContentLength = postBytes.Length;
+            HttpRequestMessage accessTokenRequest = new HttpRequestMessage(HttpMethod.Post, TokenEndpoint);
+            HttpContent postContent = new ByteArrayContent(postBytes);
+            postContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+            postContent.Headers.ContentLength = postBytes.Length;
+            accessTokenRequest.Content = postContent;
 
-            var requestStream = await webRequest.GetRequestStreamAsync();
-            await requestStream.WriteAsync(postBytes, 0, postBytes.Length);
-            await requestStream.FlushAsync();
+            var data = await RequestDataAndCheckResult(accessTokenRequest);
 
-            try
+            //Make sure invalid data was not returned.
+            if (string.IsNullOrEmpty(data))
             {
-                //Send the request and wait for a response.
-                using (var response = (HttpWebResponse)await webRequest.GetResponseAsync())
-                {
-                    //Read the response. The response will be in JSON and contain the access token and other parameters.
-                    string data = "";
-                    using (var streamReader = new StreamReader(response.GetResponseStream()))
-                    {
-                        data = await streamReader.ReadToEndAsync();
-                    }
-
-                    JObject jsonData = JObject.Parse(data);
-                    /*
-                     * There are 3 objects that must be returned here.
-                     * access_token: The access token to use in all API calls.
-                     * expires_in: The amount of time, in seconds, the application can use the access token until 
-                     * it expires.
-                     * refresh_token Used to get a new access token when the access token expires.
-                     * 
-                     * Store these values. If a value is missing, return false.
-                     */
-                    JToken value;
-                    if (!jsonData.TryGetValue("access_token", out value))
-                    {
-                        //access_token missing.
-                        LastError = "Invalid Access Token Response: Missing access_token variable.";
-                        return false;
-                    }
-                    AccessToken = (string)value;
-                    if (!jsonData.TryGetValue("refresh_token", out value))
-                    {
-                        //refresh_token missing.
-                        LastError = "Invalid Access Token Response: Missing refresh_token variable.";
-                        return false;
-                    }
-                    RefreshToken = (string)value;
-                    if (!jsonData.TryGetValue("expires_in", out value))
-                    {
-                        //expires_in missing.
-                        LastError = "Invalid Access Token Response: Missing expires_in variable.";
-                        return false;
-                    }
-                    AccessTokenExpireTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, (int)value));
-                }
-            }
-            catch (WebException ex)
-            {
-                LastError = "Failed to get an access token with the following error:\n" +
-                            ex.GetType().Name + ": " + ex.Message;
-
-
-                //Read the exception WebResponse response stream.
-                using (var streamReader = new StreamReader(ex.Response.GetResponseStream()))
-                {
-                    string data = "";
-                    data = await streamReader.ReadToEndAsync();
-                    if (!string.IsNullOrEmpty(data))
-                        LastError += "\nResponse Body: " + data;
-                }
-
-                Console.WriteLine(LastError);
+                LastErrorMessage = "Server did not return any data.";
+                LastError = OAuthClientResult.UnhandledError;
                 return false;
             }
 
-            //Return true because all access token values were found.
+            /*
+             * There are 3 objects that must be returned here.
+             * access_token: The access token to use in all API calls.
+             * expires_in: The amount of time, in seconds, the application can use the access token until 
+             * it expires.
+             * refresh_token Used to get a new access token when the access token expires.
+             * 
+             * Store these values. If a value is missing, return false.
+             */
+            JObject jsonData = JObject.Parse(data);
+
+            JToken value;
+            if (!jsonData.TryGetValue("access_token", out value))
+            {
+                //access_token missing.
+                LastErrorMessage = "Invalid Access Token Response: Missing access_token variable.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            AccessToken = (string)value;
+            if (!jsonData.TryGetValue("refresh_token", out value))
+            {
+                //refresh_token missing.
+                LastErrorMessage = "Invalid Access Token Response: Missing refresh_token variable.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            RefreshToken = (string)value;
+            if (!jsonData.TryGetValue("expires_in", out value))
+            {
+                //expires_in missing.
+                LastErrorMessage = "Invalid Access Token Response: Missing expires_in variable.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            AccessTokenExpireTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, (int)value));
+
             return true;
         }
 
@@ -251,70 +277,227 @@ namespace bakkup.Clients
             //Convert that post data into a UTF8 string.
             byte[] postBytes = Encoding.UTF8.GetBytes(postData);
 
-            //Create an HTTP Request.
-            var webRequest = (HttpWebRequest)WebRequest.CreateHttp(TokenEndpoint);
-            webRequest.Method = "POST";
-            webRequest.ContentType = "application/x-www-form-urlencoded";
-            webRequest.ContentLength = postBytes.Length;
+            //Create the HTTP request for the access token information.
+            HttpRequestMessage accessTokenRequest = new HttpRequestMessage(HttpMethod.Post, TokenEndpoint);
+            HttpContent postContent = new ByteArrayContent(postBytes);
+            postContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/x-www-form-urlencoded");
+            postContent.Headers.ContentLength = postBytes.Length;
+            accessTokenRequest.Content = postContent;
 
-            //Write in the HTTP request data.
-            var requestStream = await webRequest.GetRequestStreamAsync();
-            await requestStream.WriteAsync(postBytes, 0, postBytes.Length);
-            await requestStream.FlushAsync();
+            //The request was successful.
+            string data = await RequestDataAndCheckResult(accessTokenRequest);
 
-            //Send the request and wait for the response.
+            //Make sure invalid data was not returned.
+            if (string.IsNullOrEmpty(data))
+            {
+                LastErrorMessage = "Server did not return any data.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+
+            /*
+             * There are 2 objects that must be returned here.
+             * access_token: The access token to use in all API calls.
+             * expires_in: The amount of time, in seconds, the application can use the access token until 
+             * it expires.
+             * 
+             * Store these values. If a value is missing, return false.
+             */
+            JObject jsonData = JObject.Parse(data);
+
+            JToken value;
+            if (!jsonData.TryGetValue("access_token", out value))
+            {
+                //access_token missing.
+                LastErrorMessage = "Invalid Access Token Response: Missing access_token variable.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            AccessToken = (string)value;
+            if (!jsonData.TryGetValue("expires_in", out value))
+            {
+                //expires_in missing.
+                LastErrorMessage = "Invalid Access Token Response: Missing expires_in variable.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            AccessTokenExpireTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, (int)value));
+
+            return true;
+        }
+
+        /// <summary>
+        /// Loads data for this client from the client data file.
+        /// </summary>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        protected async Task<bool> LoadClientData()
+        {
+            //Load the data for this OAuth2Client from the ClientData.json file.
+
             try
             {
-                using (var response = (HttpWebResponse)await webRequest.GetResponseAsync())
-                {
-                    //Read the response. The response will be in JSON and contain the access token and other parameters.
-                    string data = "";
-                    using (var streamReader = new StreamReader(response.GetResponseStream()))
-                    {
-                        data = await streamReader.ReadToEndAsync();
-                    }
+                string rawJson = null;
 
-                    JObject jsonData = JObject.Parse(data);
-                    /*
-                     * There are 2 objects that must be returned here.
-                     * access_token: The access token to use in all API calls.
-                     * expires_in: The amount of time, in seconds, the application can use the access token until 
-                     * it expires.
-                     * 
-                     * Store these values. If a value is missing, return false.
-                     */
-                    JToken value;
-                    if (!jsonData.TryGetValue("access_token", out value))
+                //Read the json from the file.
+                using (
+                    var stream = new FileStream("ClientData.json", FileMode.Open, FileAccess.Read, FileShare.None))
+                {
+                    using (var reader = new StreamReader(stream))
                     {
-                        //access_token missing.
-                        LastError = "Invalid Access Token Response: Missing access_token variable.";
-                        return false;
+                        rawJson = await reader.ReadToEndAsync();
                     }
-                    AccessToken = (string)value;
-                    if (!jsonData.TryGetValue("expires_in", out value))
-                    {
-                        //expires_in missing.
-                        LastError = "Invalid Access Token Response: Missing expires_in variable.";
-                        return false;
-                    }
-                    AccessTokenExpireTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, (int)value));
+                }
+
+                //Load the JSON.
+                JObject rootObj = JObject.Parse(rawJson);
+
+                //Locate the current provider in the list of providers.
+                JObject providerObj = (JObject) rootObj["Providers"][ProviderName];
+                bool isEncrypted = Convert.ToBoolean(providerObj["Encrypted"]);
+                if (isEncrypted)
+                {
+                    //Convert each value back to a plain string. For now, they are just base 64 strings.
+                    ClientId = Encoding.UTF8.GetString(Convert.FromBase64String((string) providerObj["Client ID"]));
+                    ClientSecret =
+                        Encoding.UTF8.GetString(Convert.FromBase64String((string) providerObj["Client Secret"]));
+                    AccessToken = 
+                        Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Access Token"]));
+                    RefreshToken =
+                        Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Refresh Token"]));
+                    DateTime expireTimeTemp;
+                    DateTime.TryParse(
+                        Encoding.UTF8.GetString(Convert.FromBase64String((string) providerObj["Expire Time"])),
+                        out expireTimeTemp);
+                    AccessTokenExpireTime = expireTimeTemp;
+                }
+                else
+                {
+                    //Get everything as a plain string. Call SaveClientData after reading in everything to ensure
+                    //the data is resaved, but encrypted.
+                    ClientId = (string)providerObj["Client ID"];
+                    ClientSecret =(string)providerObj["Client Secret"];
+                    AccessToken =(string)providerObj["Access Token"];
+                    RefreshToken =(string)providerObj["Refresh Token"];
+                    DateTime expireTimeTemp;
+                    DateTime.TryParse((string)providerObj["Expire Time"], out expireTimeTemp);
+                    AccessTokenExpireTime = expireTimeTemp;
+
+                    //Save the file, making sure the data is encrypted.
+                    return await SaveClientData();
                 }
             }
-            catch (WebException ex)
+            catch (FileNotFoundException)
             {
-                LastError = "Failed to get an access token using refresh token with the following error:\n" +
-                            ex.GetType().Name + ": " + ex.Message;
+                LastErrorMessage = "\"ClientData.json\" does not exist in the executable directory.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (IOException ex)
+            {
+                LastErrorMessage = "An IO error occurred while reading the ClientData.json file. \nMessage: "
+                                   + ex.Message;
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (JsonReaderException)
+            {
+                LastErrorMessage = "Unable to read the Client Data json file. Make sure it is in the correct format.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (JsonException)
+            {
+                LastErrorMessage = "Unable to parse the Client Data json file. Make sure it is in the correct format.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
 
-                //Read the exception WebResponse response stream.
-                using (var streamReader = new StreamReader(ex.Response.GetResponseStream()))
-                {
-                    string data = "";
-                    data = await streamReader.ReadToEndAsync();
-                    if (!string.IsNullOrEmpty(data))
-                        LastError += "\nResponse Body: " + data;
+            return true;
+        }
+
+        /// <summary>
+        /// Saves the current data of this client to the client data file.
+        /// </summary>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        protected async Task<bool> SaveClientData()
+        {
+            //Save the current client data to the file.
+            try
+            {
+                string rawJson = null;
+
+                using (
+                    var stream = new FileStream("ClientData.json", FileMode.Open, FileAccess.Read, FileShare.None))
+                {  
+                    using (var reader = new StreamReader(stream))
+                    {
+                        //First, open the file to get the JSON document object loaded into memory.
+                        rawJson = await reader.ReadToEndAsync();   
+                    }
                 }
 
-                Console.WriteLine(LastError);
+                //Load the JSON.
+                JObject rootObj = JObject.Parse(rawJson);
+
+                //Locate the current provider in the list of providers.
+                JObject providerObj = (JObject)rootObj["Providers"][ProviderName];
+
+                //Encrypted should be marked as true.
+                providerObj["Encrypted"] = 1;
+                //Put and encode the client data.
+                providerObj["Client ID"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(ClientId));
+                providerObj["Client Secret"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(ClientSecret));
+                providerObj["Access Token"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(AccessToken));
+                providerObj["Refresh Token"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(RefreshToken));
+                providerObj["Expire Time"] =
+                    Convert.ToBase64String(Encoding.UTF8.GetBytes(AccessTokenExpireTime.ToString()));
+
+                //Write the new JSON data to the file.
+                using (
+                    var stream = new FileStream("ClientData.json", FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                {
+                    using (var textWriter = new StreamWriter(stream))
+                    {
+                        using (var jsonWriter = new JsonTextWriter(textWriter))
+                        {
+                            rootObj.WriteTo(jsonWriter);
+                            jsonWriter.Flush();
+                        }
+                        await textWriter.FlushAsync();
+                    }
+                    await stream.FlushAsync();
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                LastErrorMessage = "\"ClientData.json\" does not exist in the executable directory.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (IOException ex)
+            {
+                LastErrorMessage = "An IO error occurred while reading or writing the ClientData.json file.\nMessage: "
+                                   + ex.Message;
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (JsonReaderException)
+            {
+                LastErrorMessage = "Unable to read the Client Data json file. Make sure it is in the correct format.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (JsonWriterException)
+            {
+                LastErrorMessage = "Json error writing to the Client Data file.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
+            }
+            catch (JsonException)
+            {
+                LastErrorMessage = "Unable to parse the Client Data json file. Make sure it is in the correct format.";
+                LastError = OAuthClientResult.UnexpectedError;
+                return false;
             }
 
             return true;
@@ -342,7 +525,22 @@ namespace bakkup.Clients
         /// <summary>
         /// Gets the error message of the last error that occurred in the client.
         /// </summary>
-        public string LastError { get; protected set; }
+        public string LastErrorMessage { get; protected set; }
+
+        /// <summary>
+        /// Gets the last HTTP error that occurred in the client. This is only updated when LastError is an HttpError.
+        /// </summary>
+        public int LastHttpErrorCode { get; protected set; }
+
+        /// <summary>
+        /// Gets the type of the last error that occurred in the client.
+        /// </summary>
+        public OAuthClientResult LastError { get; protected set; }
+
+        /// <summary>
+        /// Gets a value indicating whether or not the user is currently logged into the remote service.
+        /// </summary>
+        public bool IsLoggedIn { get; protected set; }
 
         #endregion
 
@@ -352,11 +550,107 @@ namespace bakkup.Clients
         /// Runs the login process for this OAuth2Client instance.
         /// </summary>
         /// <returns>A value indicating whether or not the login process was successful.</returns>
-        public abstract Task<bool> PerformLogin();
+        public abstract Task<bool> Login();
 
+        /// <summary>
+        /// Runs the logout process for this OAuth2Client instance.
+        /// </summary>
+        public abstract void Logout();
+
+        /// <summary>
+        /// Makes and sends a server an authorized message using the specified url.
+        /// </summary>
+        /// <param name="url">The url to send the post message to.</param>
+        /// <param name="httpMethod">The HTTP method to use when sending the server a message.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public virtual async Task<string> SendAuthorizedRequestMessage(string url, HttpMethod httpMethod)
+        {
+            //Prepare an authorized HTTP request. The logged in property must be set to true in order to do this.
+            if (!IsLoggedIn)
+            {
+                //Need to be logged in to perform a request that needs authorization.
+            }
+
+            //Create the message to send to the server.
+            var message = new HttpRequestMessage(httpMethod, url);
+            message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
+            message.Headers.UserAgent.Add(new ProductInfoHeaderValue(
+                new ProductHeaderValue(Resources.ApplicationName, Resources.Version)));
+
+            return await RequestDataAndCheckResult(message);
+        }
+
+        /// <summary>
+        /// Makes and sends a server a message using the specified url.
+        /// </summary>
+        /// <param name="url">The url to send the get message to.</param>
+        /// <param name="httpMethod">The HTTP method to use when sending the server a request message.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public virtual async Task<string> SendRequestMessage(string url, HttpMethod httpMethod)
+        {
+            //Create the message to send to the server.
+            var message = new HttpRequestMessage(httpMethod, url);
+            message.Headers.UserAgent.Add(new ProductInfoHeaderValue(
+                new ProductHeaderValue(Resources.ApplicationName, Resources.Version)));
+
+            return await RequestDataAndCheckResult(message);
+        }
+            
         #endregion
 
         #region Private Methods
+
+        //General method that sends some request to the server and checks the response. Handles as many errors as
+        //possible here so client data doesn't need to do as much.
+        private async Task<string> RequestDataAndCheckResult(HttpRequestMessage mess)
+        {
+            HttpResponseMessage response = null;
+            try
+            {
+                response = await WebClient.SendAsync(mess);
+                string result = await response.Content.ReadAsStringAsync();
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    //Server responded with an HTTP error. What kind of HTTP error is this?
+                    if (response.StatusCode == HttpStatusCode.Unauthorized)
+                    {
+                        //An unauthorized error means this app does not have permission to do something to the server.
+                        //More than likely, the access token has expired. Try to request a new access token using a
+                        //refresh token.
+                        //TODO: This should automatically attempt to login using a refresh token.
+                        LastErrorMessage = "Cannot access the requested resource. " +
+                                           "The access token may have expired or access may have been revoked.";
+                        LastError = OAuthClientResult.Unauthorized;
+                        return null;
+                    }
+                    else
+                    {
+                        //Some other HTTP error occurred.
+                        LastErrorMessage = "HTTP " + response.StatusCode.ToString() +
+                                           " Error: " + response.ReasonPhrase;
+                        LastHttpErrorCode = (int)response.StatusCode;
+                        LastError = OAuthClientResult.HttpError;
+                        return null;
+                    }
+                }
+
+                //Everything should be good. Return whatever is is the server returned.
+                return result;
+            }
+            catch (Exception ex)
+            {
+                LastError = OAuthClientResult.UnhandledError;
+                LastErrorMessage = ex.GetType().Name + ": " + ex.Message;
+                return null;
+            }
+            finally
+            {
+                mess.Dispose();
+                //Cool new syntax that just means if not null, do something.
+                response?.Dispose();
+            }
+        }
 
         private Uri ConstructUri(string baseUri, NameValueCollection parameters)
         {
@@ -365,7 +659,7 @@ namespace bakkup.Clients
                 parameters.AllKeys.Select(k => HttpUtility.UrlEncode(k) + "=" + HttpUtility.UrlEncode(parameters[k]));
             var queryPart = string.Join("&", keyValuePairs);
 
-            return new UriBuilder(baseUri) {Query = queryPart}.Uri;
+            return new UriBuilder(baseUri) { Query = queryPart }.Uri;
         }
 
         #endregion

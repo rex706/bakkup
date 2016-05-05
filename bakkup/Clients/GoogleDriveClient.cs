@@ -14,17 +14,11 @@ namespace bakkup.Clients
     /// </summary>
     public class GoogleDriveClient : OAuth2Client
     {
-        private const string Client = "315452663633-0onrc7415g98gupp59gbld9c1s8p60h3.apps.googleusercontent.com";
-        private const string ClientSecretId = "tlPLlN7xpndsZUZc0Oo0FDfc";
         private const string AuthUri = "https://accounts.google.com/o/oauth2/v2/auth";
         private const string TokenUri = "https://www.googleapis.com/oauth2/v4/token";
         private const string Redirect = "http://localhost/";
 
         protected override string AuthorizationEndpoint => AuthUri;
-
-        protected override string ClientId => Client;
-
-        protected override string ClientSecret => ClientSecretId;
 
         protected override string TokenEndpoint => TokenUri;
 
@@ -37,13 +31,17 @@ namespace bakkup.Clients
             get { return new List<string>() { "error_code", "code" }; }
         }
 
-        public GoogleDriveClient(Form parentWindow) : base(parentWindow)
+        /// <summary>
+        /// Goes through the login process. This will either initialize the client with a stored access token, use
+        /// a refresh token to get access, or ask the user to sign into their Google Drive account to give the app
+        /// permission.
+        /// </summary>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        public override async Task<bool> Login()
         {
+            //Before going through the whole login process, check if there is a not expired access token available.
             
-        }
 
-        public override async Task<bool> PerformLogin()
-        {
             var authorizationParameters = new NameValueCollection();
             var scopes = new List<string>();
 
@@ -72,14 +70,16 @@ namespace bakkup.Clients
                 //Error while trying to access user's account.
                 if (query["error_code"].StartsWith("access_denied"))
                 {
-                    LastError = "User denied access.";
+                    LastErrorMessage = "User denied access to their Google Drive.";
+                    LastError = OAuthClientResult.UserCancelled;
                     return false;
                 }
             }
             if (query["code"] == null)
             {
                 //Something went wrong because there is no "code" parameter.
-                LastError = "Google Drive did not provide \"code\" parameter in response.";
+                LastErrorMessage = "Google Drive did not provide \"code\" parameter in response.";
+                LastError = OAuthClientResult.UnexpectedError;
                 return false;
             }
 
@@ -95,6 +95,12 @@ namespace bakkup.Clients
 
             //Now, using the above parameters, request an access token.
             return await RequestAccessToken(accessTokenParams);
+        }
+
+        public override void Logout()
+        {
+            
+            throw new NotImplementedException();
         }
     }
 }

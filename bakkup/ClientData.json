@@ -1,0 +1,12 @@
+{
+    "Providers": {
+        "Google Drive": {
+            "Encrypted": 0,
+            "Client ID": "315452663633-0onrc7415g98gupp59gbld9c1s8p60h3.apps.googleusercontent.com",
+            "Client Secret": "tlPLlN7xpndsZUZc0Oo0FDfc",
+            "Access Token": "",
+            "Refresh Token": "",
+            "Expire Time": ""
+        }
+    }
+}
