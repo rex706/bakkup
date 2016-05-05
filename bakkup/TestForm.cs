@@ -20,9 +20,17 @@ namespace bakkup
 
         private async void buttonStartLogin_Click(object sender, EventArgs e)
         {
-            GoogleDriveClient client = new GoogleDriveClient(this);
-            await client.PerformLogin();
-            Console.WriteLine("Done");
+            GoogleDriveClient client = new GoogleDriveClient();
+            if (!await client.Login())
+            {
+                //Failed to login.
+                MessageBox.Show("Failed to login to Google Drive!", "Login Failed", MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+                Console.WriteLine("Login Error Occurred:");
+                Console.WriteLine(client.LastErrorMessage);
+            }
+            else
+                Console.WriteLine("Login successful.");
         }
     }
 }

@@ -39,8 +39,36 @@ namespace bakkup.Clients
         /// <returns>A value indicating success or failure of the operation.</returns>
         public override async Task<bool> Login()
         {
-            //Before going through the whole login process, check if there is a not expired access token available.
-            
+            //Load up the current data for this client. If this fails, login cannot continue.
+            var result = await LoadClientData();
+            if (!result)
+                return false;
+
+            //Is there an access token available that has not yet expired?
+            if (!string.IsNullOrEmpty(AccessToken) && DateTime.Now < AccessTokenExpireTime)
+            {
+                //Because there is a valid access token available, the authorization process is not necessary. The app
+                //is logged in right now.
+                return true;
+            }
+            //An access token isn't available or it has expired. Is a refresh token available to use?
+            if (!string.IsNullOrEmpty(RefreshToken))
+            {
+                //Try to use the refresh token to load the data.
+                var refreshTokenParams = new NameValueCollection()
+                    {
+                        {"refresh_token", RefreshToken },
+                        {"client_id", ClientId },
+                        {"client_secret", ClientSecret },
+                        {"grant_type", "refresh_token" }
+                    };
+                result = await RequestAccessTokenUsingRefreshToken(refreshTokenParams);
+                if (result)
+                    return true; //Successfully used refresh token to log in.
+                if (LastError != OAuthClientResult.Unauthorized)
+                    return false; //An error other than Unauthorized occurred. Return false.
+                //At this point, the user will need to go through the authorization process to log in.
+            }
 
             var authorizationParameters = new NameValueCollection();
             var scopes = new List<string>();
@@ -57,12 +85,14 @@ namespace bakkup.Clients
             //Make sure authorizeUrl is not null. If it is null then something went wrong.
             if (authorizeUrl == null)
             {
+                LastError = OAuthClientResult.UnexpectedError;
+                LastErrorMessage = "Authorization URL is null or empty.";
                 return false;
             }
 
             //Check the parameters of the url. Google Drive puts an "error_code" parameter upon failure, set to
             //access_denied if the user denies this app access to their Google Drive. Otherwise, it sets a 
-            //"" parameter with the 
+            //"code" parameter with the code to use to get the initial access token.
             var builder = new UriBuilder(authorizeUrl);
             var query = HttpUtility.ParseQueryString(builder.Query);
             if (query["error_code"] != null)
@@ -95,12 +125,6 @@ namespace bakkup.Clients
 
             //Now, using the above parameters, request an access token.
             return await RequestAccessToken(accessTokenParams);
-        }
-
-        public override void Logout()
-        {
-            
-            throw new NotImplementedException();
         }
     }
 }

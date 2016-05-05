@@ -260,6 +260,12 @@ namespace bakkup.Clients
             }
             AccessTokenExpireTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, (int)value));
 
+            //With the access token acquired, save the current client state to the client data file.
+            var result = await SaveClientData();
+            if (!result)
+                return false;
+            //If save was successful, the app is logged in.
+            IsLoggedIn = true;
             return true;
         }
 
@@ -323,6 +329,13 @@ namespace bakkup.Clients
             }
             AccessTokenExpireTime = DateTime.Now.Add(new TimeSpan(0, 0, 0, (int)value));
 
+            //With the access token acquired, save the current client state to the client data file.
+            var result = await SaveClientData();
+            if (!result)
+                return false;
+            //If save was successful, the app is logged in.
+            IsLoggedIn = true;
+
             return true;
         }
 
@@ -352,37 +365,56 @@ namespace bakkup.Clients
                 JObject rootObj = JObject.Parse(rawJson);
 
                 //Locate the current provider in the list of providers.
-                JObject providerObj = (JObject) rootObj["Providers"][ProviderName];
+                JObject providerObj = (JObject)rootObj["Providers"][ProviderName];
                 bool isEncrypted = Convert.ToBoolean(providerObj["Encrypted"]);
                 if (isEncrypted)
                 {
                     //Convert each value back to a plain string. For now, they are just base 64 strings.
-                    ClientId = Encoding.UTF8.GetString(Convert.FromBase64String((string) providerObj["Client ID"]));
+                    ClientId = Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Client ID"]));
                     ClientSecret =
-                        Encoding.UTF8.GetString(Convert.FromBase64String((string) providerObj["Client Secret"]));
-                    AccessToken = 
+                        Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Client Secret"]));
+                    AccessToken =
                         Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Access Token"]));
                     RefreshToken =
                         Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Refresh Token"]));
                     DateTime expireTimeTemp;
                     DateTime.TryParse(
-                        Encoding.UTF8.GetString(Convert.FromBase64String((string) providerObj["Expire Time"])),
+                        Encoding.UTF8.GetString(Convert.FromBase64String((string)providerObj["Expire Time"])),
                         out expireTimeTemp);
                     AccessTokenExpireTime = expireTimeTemp;
+
+                    //The user is logged in if a valid access token exists.
+                    if (DateTime.Now < AccessTokenExpireTime && !string.IsNullOrEmpty(AccessToken))
+                        IsLoggedIn = true;
+#if DEBUG
+                    Console.WriteLine("Access Token Value: " + AccessToken);
+                    Console.WriteLine("Refresh Token Value: " + RefreshToken);
+                    Console.WriteLine("Access Token Expire Time: " + AccessTokenExpireTime);
+#endif
                 }
                 else
                 {
                     //Get everything as a plain string. Call SaveClientData after reading in everything to ensure
                     //the data is resaved, but encrypted.
                     ClientId = (string)providerObj["Client ID"];
-                    ClientSecret =(string)providerObj["Client Secret"];
-                    AccessToken =(string)providerObj["Access Token"];
-                    RefreshToken =(string)providerObj["Refresh Token"];
+                    ClientSecret = (string)providerObj["Client Secret"];
+                    AccessToken = (string)providerObj["Access Token"];
+                    RefreshToken = (string)providerObj["Refresh Token"];
                     DateTime expireTimeTemp;
                     DateTime.TryParse((string)providerObj["Expire Time"], out expireTimeTemp);
                     AccessTokenExpireTime = expireTimeTemp;
 
-                    //Save the file, making sure the data is encrypted.
+                    //The user is logged in if a valid access token exists.
+                    if (DateTime.Now < AccessTokenExpireTime && !string.IsNullOrEmpty(AccessToken))
+                        IsLoggedIn = true;
+
+#if DEBUG
+                    Console.WriteLine("Access Token Value: " + AccessToken);
+                    Console.WriteLine("Refresh Token Value: " + RefreshToken);
+                    Console.WriteLine("Access Token Expire Time: " + AccessTokenExpireTime);
+#endif
+
+                    //Save the file again, this time making sure the data is encrypted.
                     return await SaveClientData();
                 }
             }
@@ -428,11 +460,11 @@ namespace bakkup.Clients
 
                 using (
                     var stream = new FileStream("ClientData.json", FileMode.Open, FileAccess.Read, FileShare.None))
-                {  
+                {
                     using (var reader = new StreamReader(stream))
                     {
                         //First, open the file to get the JSON document object loaded into memory.
-                        rawJson = await reader.ReadToEndAsync();   
+                        rawJson = await reader.ReadToEndAsync();
                     }
                 }
 
@@ -442,7 +474,7 @@ namespace bakkup.Clients
                 //Locate the current provider in the list of providers.
                 JObject providerObj = (JObject)rootObj["Providers"][ProviderName];
 
-                //Encrypted should be marked as true.
+                //Encrypted should be marked as true. Saving to this file always saves the data encrypted.
                 providerObj["Encrypted"] = 1;
                 //Put and encode the client data.
                 providerObj["Client ID"] = Convert.ToBase64String(Encoding.UTF8.GetBytes(ClientId));
@@ -454,7 +486,8 @@ namespace bakkup.Clients
 
                 //Write the new JSON data to the file.
                 using (
-                    var stream = new FileStream("ClientData.json", FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+                    var stream = new FileStream("ClientData.json", FileMode.Create,
+                    FileAccess.ReadWrite, FileShare.None))
                 {
                     using (var textWriter = new StreamWriter(stream))
                     {
@@ -463,9 +496,7 @@ namespace bakkup.Clients
                             rootObj.WriteTo(jsonWriter);
                             jsonWriter.Flush();
                         }
-                        await textWriter.FlushAsync();
                     }
-                    await stream.FlushAsync();
                 }
             }
             catch (FileNotFoundException)
@@ -553,9 +584,15 @@ namespace bakkup.Clients
         public abstract Task<bool> Login();
 
         /// <summary>
-        /// Runs the logout process for this OAuth2Client instance.
+        /// Runs the logout process for this OAuth2Client instance. Logging out equates to clearing the access token
+        /// and refresh token, and then saving this change to the client data file.
         /// </summary>
-        public abstract void Logout();
+        public async Task<bool> Logout()
+        {
+            AccessToken = "";
+            RefreshToken = "";
+            return await SaveClientData();
+        }
 
         /// <summary>
         /// Makes and sends a server an authorized message using the specified url.
@@ -595,7 +632,7 @@ namespace bakkup.Clients
 
             return await RequestDataAndCheckResult(message);
         }
-            
+
         #endregion
 
         #region Private Methods
