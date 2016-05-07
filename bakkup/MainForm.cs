@@ -184,6 +184,7 @@ namespace bakkup
             label1.Text = "Cloud Backup Complete!";
         }
 
+        //new
         private void buttonNewBackup_Click(object sender, EventArgs e)
         {
             //prompt user to locate local save folder

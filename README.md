@@ -5,6 +5,8 @@ Latest version: 1.4
 
 ![alt tag](http://i.imgur.com/NTk0dsE.png)
 
+[Download](https://drive.google.com/file/d/0BzKq8PEZkdhSall0NVRlOW03Q1U/view?usp=sharing)
+
 Make sure to be logged into your Google Drive account
 
 Files will be saved to "\Google Drive\bakkup\". Directory will be created on first use if not found. 
