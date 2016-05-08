@@ -70,6 +70,15 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Root folder for the Bakkup application. This folder contains saved game data and should not be touched manually. Use the Bakkup application if you would like to move this folder..
+        /// </summary>
+        internal static string RemoteBakkupFolderDescription {
+            get {
+                return ResourceManager.GetString("RemoteBakkupFolderDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to 1.4.
         /// </summary>
         internal static string Version {

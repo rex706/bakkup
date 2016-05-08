@@ -30,6 +30,9 @@ namespace bakkup
             Controls.Add(_loginBrowser);
 
             AuthorizationRedirectUrl = null;
+            //Assume authorization was cancelled until the user actually completes the process, in which case this will
+            //be set to false.
+            WasAuthorizationCancelled = true;
         }
 
         public void RequestAuthorization(string authorizationUrl, List<string> closingParamsHint)
@@ -55,6 +58,8 @@ namespace bakkup
                     //Set AuthorizationRedirectUrl to whatever the page has redirected to once the user has given access
                     //or denied access to this app.
                     AuthorizationRedirectUrl = e.Url.ToString();
+                    //Since the user completed authorization, WasAuthorizationCancelled should be false.
+                    WasAuthorizationCancelled = false;
                     //Close the window.
                     Close();
                     return;
@@ -69,5 +74,10 @@ namespace bakkup
         /// login page.
         /// </summary>
         public string AuthorizationRedirectUrl { get; private set; }
+
+        /// <summary>
+        /// If true, authorization was cancelled by closing the authorization window.
+        /// </summary>
+        public bool WasAuthorizationCancelled { get; private set; }
     }
 }

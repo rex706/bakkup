@@ -29,6 +29,9 @@
         private void InitializeComponent()
         {
             this.buttonStartLogin = new System.Windows.Forms.Button();
+            this.progressBarProgress = new System.Windows.Forms.ProgressBar();
+            this.buttonUpload = new System.Windows.Forms.Button();
+            this.buttonBakkupFolder = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonStartLogin
@@ -41,11 +44,44 @@
             this.buttonStartLogin.UseVisualStyleBackColor = true;
             this.buttonStartLogin.Click += new System.EventHandler(this.buttonStartLogin_Click);
             // 
+            // progressBarProgress
+            // 
+            this.progressBarProgress.Location = new System.Drawing.Point(12, 226);
+            this.progressBarProgress.Name = "progressBarProgress";
+            this.progressBarProgress.Size = new System.Drawing.Size(260, 23);
+            this.progressBarProgress.Step = 1;
+            this.progressBarProgress.TabIndex = 1;
+            // 
+            // buttonUpload
+            // 
+            this.buttonUpload.Enabled = false;
+            this.buttonUpload.Location = new System.Drawing.Point(70, 125);
+            this.buttonUpload.Name = "buttonUpload";
+            this.buttonUpload.Size = new System.Drawing.Size(101, 23);
+            this.buttonUpload.TabIndex = 2;
+            this.buttonUpload.Text = "Upload Test File";
+            this.buttonUpload.UseVisualStyleBackColor = true;
+            this.buttonUpload.Click += new System.EventHandler(this.buttonUpload_Click);
+            // 
+            // buttonBakkupFolder
+            // 
+            this.buttonBakkupFolder.Enabled = false;
+            this.buttonBakkupFolder.Location = new System.Drawing.Point(61, 154);
+            this.buttonBakkupFolder.Name = "buttonBakkupFolder";
+            this.buttonBakkupFolder.Size = new System.Drawing.Size(120, 23);
+            this.buttonBakkupFolder.TabIndex = 3;
+            this.buttonBakkupFolder.Text = "Create Bakkup Folder";
+            this.buttonBakkupFolder.UseVisualStyleBackColor = true;
+            this.buttonBakkupFolder.Click += new System.EventHandler(this.buttonBakkupFolder_Click);
+            // 
             // TestForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.buttonBakkupFolder);
+            this.Controls.Add(this.buttonUpload);
+            this.Controls.Add(this.progressBarProgress);
             this.Controls.Add(this.buttonStartLogin);
             this.Name = "TestForm";
             this.Text = "TestForm";
@@ -56,5 +92,8 @@
         #endregion
 
         private System.Windows.Forms.Button buttonStartLogin;
+        private System.Windows.Forms.ProgressBar progressBarProgress;
+        private System.Windows.Forms.Button buttonUpload;
+        private System.Windows.Forms.Button buttonBakkupFolder;
     }
 }

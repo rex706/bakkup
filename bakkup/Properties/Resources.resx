@@ -120,6 +120,9 @@
   <data name="ApplicationName" xml:space="preserve">
     <value>Bakkup</value>
   </data>
+  <data name="RemoteBakkupFolderDescription" xml:space="preserve">
+    <value>Root folder for the Bakkup application. This folder contains saved game data and should not be touched manually. Use the Bakkup application if you would like to move this folder.</value>
+  </data>
   <data name="Version" xml:space="preserve">
     <value>1.4</value>
   </data>

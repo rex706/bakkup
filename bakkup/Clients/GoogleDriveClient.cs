@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows.Forms;
+using Newtonsoft.Json.Linq;
 
 namespace bakkup.Clients
 {
@@ -39,6 +41,10 @@ namespace bakkup.Clients
         /// <returns>A value indicating success or failure of the operation.</returns>
         public override async Task<bool> Login()
         {
+            //Return true if already logged in.
+            if (IsLoggedIn)
+                return true;
+
             //Load up the current data for this client. If this fails, login cannot continue.
             var result = await LoadClientData();
             if (!result)
@@ -125,6 +131,121 @@ namespace bakkup.Clients
 
             //Now, using the above parameters, request an access token.
             return await RequestAccessToken(accessTokenParams);
+        }
+
+        /// <summary>
+        /// Sends a request message to Google Drive using a url and HTTP method. This implementation of 
+        /// SendRequestMessage will check for errors returned as JSON.
+        /// </summary>
+        /// <param name="url">The url to send the get message to.</param>
+        /// <param name="httpMethod">The HTTP method to use when sending the server a request message.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public override async Task<string> SendRequestMessage(string url, HttpMethod httpMethod)
+        {
+            //Note this will call the base SendRequestMessage(string, HttpMethod), which will call the derived
+            //SendRequestMessage(HttpRequestMessage).
+            return await base.SendRequestMessage(url, httpMethod);
+        }
+
+        /// <summary>
+        /// Sends a request message to Google Drive. This implementation of SendRequestMessage will check for errors
+        /// returned as JSON.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public override async Task<string> SendRequestMessage(HttpRequestMessage message)
+        {
+            string result = await base.SendRequestMessage(message);
+            //Did the server return a successful response? If not, it probably returned the exact error as JSON.
+            if (string.IsNullOrEmpty(result))
+            {
+                //Nothing to be done here, as the server did not return a body. Let the error message remain what
+                //it is.
+                return result;
+            }
+
+            if (LastError != OAuthClientResult.Success)
+            {
+                try
+                {
+                    //Parse the error json text.
+                    JObject rootObj = JObject.Parse(result);
+                    //Set last error message to the error Google Drive returned, which may be more descriptive.
+                    LastErrorMessage = "Google Drive Error Message Response: " + (string)rootObj["error"]["message"];
+                }
+                catch (Exception)
+                {
+                    //Could not parse the error text returned by Google, so nothing to be done.
+                    return null;
+                }
+                
+            }
+
+            //Return the data, having parsed it for possible error messages.
+            return result;
+        }
+
+        /// <summary>
+        /// Sends an authorized request message to Google Drive using a url and HTTP method. This implementation of 
+        /// SendAuthorizedRequestMessage will check for errors returned as JSON.
+        /// </summary>
+        /// <param name="url">The url to send the get message to.</param>
+        /// <param name="httpMethod">The HTTP method to use when sending the server a request message.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public override async Task<string> SendAuthorizedRequestMessage(string url, HttpMethod httpMethod)
+        {
+            return await base.SendAuthorizedRequestMessage(url, httpMethod);
+        }
+
+        /// <summary>
+        /// Sends an authorized request message to Google Drive. This implementation of SendAuthorizedRequestMessage
+        /// will check for errors returned as JSON.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public override async Task<string> SendAuthorizedRequestMessage(HttpRequestMessage message)
+        {
+            return await SendAuthorizedRequestMessage(message, null);
+        }
+
+        /// <summary>
+        /// Sends an authorized request message to Google Drive. This implementation of SendAuthorizedRequestMessage
+        /// will check for errrors returned as JSON. It will also report progress.
+        /// </summary>
+        /// <param name="message">The message to send.</param>
+        /// <param name="progress">An IProgress progress reporter.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public override async Task<string> SendAuthorizedRequestMessage(HttpRequestMessage message,
+            IProgress<int> progress)
+        {
+            string result = await base.SendAuthorizedRequestMessage(message, progress);
+
+            //Did the server return a successful response? If not, it probably returned the exact error as JSON.
+            if (string.IsNullOrEmpty(result))
+            {
+                //Nothing to be done here, as the server did not return a body.
+                return result;
+            }
+
+            if (LastError != OAuthClientResult.Success)
+            {
+                try
+                {
+                    //Parse the error json text.
+                    JObject rootObj = JObject.Parse(result);
+                    //Set last error message to the error Google Drive returned, which may be more descriptive.
+                    LastErrorMessage = "Google Drive Error Message Response: " + (string)rootObj["error"]["message"];
+                }
+                catch (Exception)
+                {
+                    //Could not parse the error text returned by Google, so nothing to be done.
+                    return null;
+                }
+
+            }
+
+            //Return the data, having parsed it for possible error messages.
+            return result;
         }
     }
 }

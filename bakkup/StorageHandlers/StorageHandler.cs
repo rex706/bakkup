@@ -12,13 +12,13 @@ namespace bakkup.StorageHandlers
     /// Represents a storage handler that keeps the local game save data in sync with online save data. Should be
     /// extended to handle different online services such as Google Drive, OneDrive, DropBox, etc.
     /// </summary>
-    public abstract class StorageHandler
+    public interface IStorageHandler
     {
         /// <summary>
         /// The handler should perform necessary initialization on the remote storage drive, if necessary.
         /// </summary>
         /// <returns>A value indicating success or failure of the operation.</returns>
-        public abstract Task<bool> InitializeHandler();
+        Task<bool> InitializeHandler();
 
         /// <summary>
         /// Indicates the StorageHandler should perform a full sync. This means the local and remote save game folders
@@ -26,12 +26,24 @@ namespace bakkup.StorageHandlers
         /// </summary>
         /// <param name="gameSaveDirs">The list of registered save game directories to work on.</param>
         /// <returns>A value indicating success or failure of the operation.</returns>
-        public abstract Task<bool> Sync(List<DirectoryInfo> gameSaveDirs);
+        Task<bool> Sync(List<DirectoryInfo> gameSaveDirs);
 
         /// <summary>
         /// Deletes all game save data off of the remote drive, including the game save folder.
         /// </summary>
         /// <returns>A value indicating success or failure of the operation.</returns>
-        public abstract Task<bool> DeleteAllRemoteData();
+        Task<bool> DeleteAllRemoteData();
+
+        /// <summary>
+        /// Gets the error message of the last message. This should be checked any time a call fails. For the most
+        /// part, this just propogates errors from the internal OAuth2Client.
+        /// </summary>
+        string LastErrorMessage { get; }
+
+        /// <summary>
+        /// Gets the last error that occurred. This should be checked any time a call fails. For the most part, this
+        /// just propogates errors from the internal OAuth2Client.
+        /// </summary>
+        OAuthClientResult LastError { get; }
     }
 }

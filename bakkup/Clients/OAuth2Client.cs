@@ -6,7 +6,9 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Handlers;
 using System.Net.Http.Headers;
+using System.Runtime.Remoting.Channels;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,7 +49,12 @@ namespace bakkup.Clients
         /// An unexpected error has occurred. This usually means the server being contacted did something
         /// strange.
         /// </summary>
-        UnexpectedError = 5
+        UnexpectedError = 5,
+        /// <summary>
+        /// An error occurred while parsing JSON. This is a sign that the API may have changed and the application
+        /// should be updated.
+        /// </summary>
+        Parser = 6
     }
 
     /// <summary>
@@ -56,6 +63,7 @@ namespace bakkup.Clients
     /// </summary>
     public abstract class OAuth2Client
     {
+        private readonly ProgressMessageHandler _clientProgress;
 
         #region Protected Abstract Properties
 
@@ -102,10 +110,6 @@ namespace bakkup.Clients
 
         #endregion
 
-        #region Protected Abstract Methods
-
-        #endregion
-
         #region Protected Properties
 
         /// <summary>
@@ -134,7 +138,8 @@ namespace bakkup.Clients
         /// </summary>
         protected OAuth2Client()
         {
-            WebClient = new HttpClient();
+            _clientProgress = new ProgressMessageHandler(new HttpClientHandler());
+            WebClient = new HttpClient(_clientProgress);
             IsLoggedIn = false;
         }
 
@@ -144,7 +149,7 @@ namespace bakkup.Clients
         /// </summary>
         /// <param name="scopes">The scopes that the app has requested.</param>
         /// <param name="extraParams">Any extra parameters that are needed for authorization.</param>
-        /// <returns></returns>
+        /// <returns>The authorization code for getting the initial access token, or null on cancel or error.</returns>
         protected string RequestAuthorization(List<string> scopes, NameValueCollection extraParams)
         {
             //Represents the collection that will contain all parameters of the request url. Start by adding the
@@ -175,7 +180,7 @@ namespace bakkup.Clients
                 parameters.Add(extraParams);
 
             //Create the authorization request url.
-            string requestUrl = ConstructUri(AuthorizationEndpoint, parameters).ToString();
+            var requestUrl = ConstructUri(AuthorizationEndpoint, parameters).ToString();
 
             //Create the authorization window that will prompt the user to login to their account. The user will then
             //grant or deny access to this app.
@@ -186,8 +191,26 @@ namespace bakkup.Clients
             //access to this app, or chooses to just close the window (also denying access to this app).
             loginWindow.ShowDialog();
 
-            //Return the authorization redirect url. Handling of parameters in this url is done by classes that
-            //extend this class.
+            //Check if authorization was cancelled by closing the window early.
+            if (loginWindow.WasAuthorizationCancelled)
+            {
+                LastError = OAuthClientResult.UserCancelled;
+                LastErrorMessage = "Authorization process cancelled by closing login window.";
+                return null;
+            }
+            //The redirect url should not be empty.
+            if (!string.IsNullOrEmpty(loginWindow.AuthorizationRedirectUrl))
+            {
+                LastError = OAuthClientResult.UnexpectedError;
+                LastErrorMessage = "Authorization url is null or empty.";
+                return null;
+            }
+
+            //Success.
+            LastError = OAuthClientResult.Success;
+            LastErrorMessage = "Operation completed successfully.";
+
+            //Return the authorization code. Subclasses will handle this value, including if it is null or empty.
             return loginWindow.AuthorizationRedirectUrl;
         }
 
@@ -213,7 +236,7 @@ namespace bakkup.Clients
             postContent.Headers.ContentLength = postBytes.Length;
             accessTokenRequest.Content = postContent;
 
-            var data = await RequestDataAndCheckResult(accessTokenRequest);
+            var data = await SendRequestMessage(accessTokenRequest);
 
             //Make sure invalid data was not returned.
             if (string.IsNullOrEmpty(data))
@@ -264,8 +287,13 @@ namespace bakkup.Clients
             var result = await SaveClientData();
             if (!result)
                 return false;
+
             //If save was successful, the app is logged in.
             IsLoggedIn = true;
+            //Success.
+            LastError = OAuthClientResult.Success;
+            LastErrorMessage = "Operation completed successfully.";
+
             return true;
         }
 
@@ -291,7 +319,7 @@ namespace bakkup.Clients
             accessTokenRequest.Content = postContent;
 
             //The request was successful.
-            string data = await RequestDataAndCheckResult(accessTokenRequest);
+            string data = await SendRequestMessage(accessTokenRequest);
 
             //Make sure invalid data was not returned.
             if (string.IsNullOrEmpty(data))
@@ -333,9 +361,12 @@ namespace bakkup.Clients
             var result = await SaveClientData();
             if (!result)
                 return false;
+
             //If save was successful, the app is logged in.
             IsLoggedIn = true;
-
+            //Success.
+            LastError = OAuthClientResult.Success;
+            LastErrorMessage = "Operation completed successfully.";
             return true;
         }
 
@@ -391,6 +422,7 @@ namespace bakkup.Clients
                     Console.WriteLine("Refresh Token Value: " + RefreshToken);
                     Console.WriteLine("Access Token Expire Time: " + AccessTokenExpireTime);
 #endif
+
                 }
                 else
                 {
@@ -413,7 +445,6 @@ namespace bakkup.Clients
                     Console.WriteLine("Refresh Token Value: " + RefreshToken);
                     Console.WriteLine("Access Token Expire Time: " + AccessTokenExpireTime);
 #endif
-
                     //Save the file again, this time making sure the data is encrypted.
                     return await SaveClientData();
                 }
@@ -444,6 +475,9 @@ namespace bakkup.Clients
                 return false;
             }
 
+            //Success.
+            LastError = OAuthClientResult.Success;
+            LastErrorMessage = "Operation completed successfully.";
             return true;
         }
 
@@ -531,6 +565,9 @@ namespace bakkup.Clients
                 return false;
             }
 
+            //Success.
+            LastError = OAuthClientResult.Success;
+            LastErrorMessage = "Operation completed successfully.";
             return true;
         }
 
@@ -602,19 +639,44 @@ namespace bakkup.Clients
         /// <returns>The resulting data returned by the server.</returns>
         public virtual async Task<string> SendAuthorizedRequestMessage(string url, HttpMethod httpMethod)
         {
-            //Prepare an authorized HTTP request. The logged in property must be set to true in order to do this.
+            HttpRequestMessage message = new HttpRequestMessage(httpMethod, url);
+            return await SendAuthorizedRequestMessage(message);
+        }
+
+        /// <summary>
+        /// Sends a server the specified message. Adds the missing authentication information to the message.
+        /// </summary>
+        /// <param name="message">The message to send to the server. The url and http method should be set.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public virtual async Task<string> SendAuthorizedRequestMessage(HttpRequestMessage message)
+        {
+            return await SendAuthorizedRequestMessage(message, null);
+        }
+
+        /// <summary>
+        /// Sends a server the specified message. Adds the missing authentication information
+        /// to the message. This method also reports progress.
+        /// </summary>
+        /// <param name="message">The message to send to the server. The url and http method should be set.</param>
+        /// <param name="progress">An IProgress progress reporter.</param>
+        /// <returns></returns>
+        public virtual async Task<string> SendAuthorizedRequestMessage(HttpRequestMessage message, 
+            IProgress<int> progress)
+        {
             if (!IsLoggedIn)
             {
                 //Need to be logged in to perform a request that needs authorization.
+                LastError = OAuthClientResult.Unauthorized;
+                LastErrorMessage = "A user must be logged into the client in order send an authorized request.";
+                return null;
             }
 
-            //Create the message to send to the server.
-            var message = new HttpRequestMessage(httpMethod, url);
+            //The request message was already provided. Provide the user agent and authentication header info.
             message.Headers.Authorization = new AuthenticationHeaderValue("Bearer", AccessToken);
             message.Headers.UserAgent.Add(new ProductInfoHeaderValue(
                 new ProductHeaderValue(Resources.ApplicationName, Resources.Version)));
 
-            return await RequestDataAndCheckResult(message);
+            return await RequestDataAndCheckResult(message, progress);
         }
 
         /// <summary>
@@ -625,12 +687,23 @@ namespace bakkup.Clients
         /// <returns>The resulting data returned by the server.</returns>
         public virtual async Task<string> SendRequestMessage(string url, HttpMethod httpMethod)
         {
-            //Create the message to send to the server.
-            var message = new HttpRequestMessage(httpMethod, url);
+            HttpRequestMessage message = new HttpRequestMessage(httpMethod, url);
+            return await SendRequestMessage(message);
+        }
+
+        /// <summary>
+        /// Sends a server the specified message.
+        /// </summary>
+        /// <param name="message">The message to send to the server. The url and http method should be set.</param>
+        /// <returns>The resulting data returned by the server.</returns>
+        public virtual async Task<string> SendRequestMessage(HttpRequestMessage message)
+        {
+            //The request message was already provided, and authorization information doesn't need to be added.
+            //Just add the product information.
             message.Headers.UserAgent.Add(new ProductInfoHeaderValue(
                 new ProductHeaderValue(Resources.ApplicationName, Resources.Version)));
 
-            return await RequestDataAndCheckResult(message);
+            return await RequestDataAndCheckResult(message, null);
         }
 
         #endregion
@@ -639,13 +712,44 @@ namespace bakkup.Clients
 
         //General method that sends some request to the server and checks the response. Handles as many errors as
         //possible here so client data doesn't need to do as much.
-        private async Task<string> RequestDataAndCheckResult(HttpRequestMessage mess)
+        private async Task<string> RequestDataAndCheckResult(HttpRequestMessage mess, IProgress<int> progress)
         {
             HttpResponseMessage response = null;
             try
             {
-                response = await WebClient.SendAsync(mess);
-                string result = await response.Content.ReadAsStringAsync();
+                string result;
+                if (progress != null)
+                {
+                    EventHandler<HttpProgressEventArgs> progressDelegate =
+                        delegate (object sender, HttpProgressEventArgs e)
+                        {
+                            progress.Report(e.ProgressPercentage);
+                            Console.WriteLine("Progress: " + e.ProgressPercentage);
+                        };
+
+                    //Subscrine the delegate to the receive or send progress events of the progress handler.
+                    if (mess.Method == HttpMethod.Get)
+                        _clientProgress.HttpReceiveProgress += progressDelegate;
+                    else if (mess.Method == HttpMethod.Post || mess.Method == HttpMethod.Put)
+                        _clientProgress.HttpSendProgress += progressDelegate;
+
+                    //Send the request and store the response.
+                    response = await WebClient.SendAsync(mess, HttpCompletionOption.ResponseContentRead);
+                    result = await response.Content.ReadAsStringAsync();
+
+                    //Unsubscribe from the corresponding events after downloading or uploading is complete.
+                    if (mess.Method == HttpMethod.Get)
+                        _clientProgress.HttpReceiveProgress -= progressDelegate;
+                    else if (mess.Method == HttpMethod.Post || mess.Method == HttpMethod.Put)
+                        _clientProgress.HttpSendProgress -= progressDelegate;
+                }
+                else
+                {
+                    //Send the request without reporting progress.
+                    response = await WebClient.SendAsync(mess);
+                    result = await response.Content.ReadAsStringAsync();
+                }
+                
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -659,7 +763,9 @@ namespace bakkup.Clients
                         LastErrorMessage = "Cannot access the requested resource. " +
                                            "The access token may have expired or access may have been revoked.";
                         LastError = OAuthClientResult.Unauthorized;
-                        return null;
+                        //Do not return null if the server still returned something, even though the request failed.
+                        //The server's will often return data explaining what went wrong.
+                        return result;
                     }
                     else
                     {
@@ -668,17 +774,25 @@ namespace bakkup.Clients
                                            " Error: " + response.ReasonPhrase;
                         LastHttpErrorCode = (int)response.StatusCode;
                         LastError = OAuthClientResult.HttpError;
-                        return null;
+                        //Do not return null if the server still returned something, even though the request failed.
+                        //The server's will often return data explaining what went wrong.
+                        return result;
                     }
                 }
 
                 //Everything should be good. Return whatever is is the server returned.
+
+                //Success.
+                LastError = OAuthClientResult.Success;
+                LastErrorMessage = "Operation completed successfully.";
                 return result;
             }
             catch (Exception ex)
             {
                 LastError = OAuthClientResult.UnhandledError;
                 LastErrorMessage = ex.GetType().Name + ": " + ex.Message;
+                //Do not return null if the server still returned something, even though the request failed.
+                //The server's will often return data explaining what went wrong.
                 return null;
             }
             finally
