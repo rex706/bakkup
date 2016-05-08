@@ -199,7 +199,7 @@ namespace bakkup.Clients
                 return null;
             }
             //The redirect url should not be empty.
-            if (!string.IsNullOrEmpty(loginWindow.AuthorizationRedirectUrl))
+            if (string.IsNullOrEmpty(loginWindow.AuthorizationRedirectUrl))
             {
                 LastError = OAuthClientResult.UnexpectedError;
                 LastErrorMessage = "Authorization url is null or empty.";

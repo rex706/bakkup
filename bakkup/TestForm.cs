@@ -36,7 +36,7 @@ namespace bakkup
             else
             {
                 Console.WriteLine("Login and bakkup folder initialization successful.");
-                buttonUpload.Enabled = buttonBakkupFolder.Enabled = true;
+                buttonUpload.Enabled = buttonTestFolder.Enabled = true;
             }
                 
         }
@@ -65,6 +65,15 @@ namespace bakkup
             }
         }
 
+        private async void buttonTestFolder_Click(object sender, EventArgs e)
+        {
+            await _storageHandler.CreateRemoteTestFolder();
+            if (_storageHandler.LastError == OAuthClientResult.Success)
+                Console.WriteLine("The test folder has been created successfully!");
+            else
+                Console.WriteLine("Failed to create the test folder: " + _storageHandler.LastErrorMessage);
+        }
+
         private void ReportUploadProgressCallback(int progress)
         {
             MethodInvoker invokerDelegate = delegate()
@@ -72,15 +81,6 @@ namespace bakkup
                 progressBarProgress.Value = progress;
             };
             progressBarProgress.Invoke(invokerDelegate);
-        }
-
-        private async void buttonBakkupFolder_Click(object sender, EventArgs e)
-        {
-            await _storageHandler.CreateRemoteTestFolder();
-            if(_storageHandler.LastError == OAuthClientResult.Success)
-                Console.WriteLine("The test folder has been created successfully!");
-            else
-                Console.WriteLine("Failed to create the test folder: " + _storageHandler.LastErrorMessage);
         }
     }
 }
