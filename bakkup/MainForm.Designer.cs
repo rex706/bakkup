@@ -34,13 +34,13 @@
             this.label1 = new System.Windows.Forms.Label();
             this.buttonSelect = new System.Windows.Forms.Button();
             this.buttonNewBackup = new System.Windows.Forms.Button();
+            this.ButtonImageList = new System.Windows.Forms.ImageList(this.components);
             this.buttonRefresh = new System.Windows.Forms.Button();
             this.checkBoxAutoRun = new System.Windows.Forms.CheckBox();
             this.buttonRetrieve = new System.Windows.Forms.Button();
             this.buttonBackup = new System.Windows.Forms.Button();
             this.linkLabelVersion = new System.Windows.Forms.LinkLabel();
             this.buttonRemove = new System.Windows.Forms.Button();
-            this.ButtonImageList = new System.Windows.Forms.ImageList(this.components);
             this.SeparatorLabel = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.WriteTimeListBox = new System.Windows.Forms.ListBox();
@@ -53,14 +53,14 @@
             this.listBoxBakkups.ItemHeight = 16;
             this.listBoxBakkups.Location = new System.Drawing.Point(12, 34);
             this.listBoxBakkups.Name = "listBoxBakkups";
-            this.listBoxBakkups.Size = new System.Drawing.Size(174, 148);
+            this.listBoxBakkups.Size = new System.Drawing.Size(308, 148);
             this.listBoxBakkups.TabIndex = 0;
             this.listBoxBakkups.SelectedIndexChanged += new System.EventHandler(this.listBoxBakkups_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.Font = new System.Drawing.Font("Calibri Light", 10F);
-            this.label1.Location = new System.Drawing.Point(60, 9);
+            this.label1.Location = new System.Drawing.Point(85, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(157, 16);
             this.label1.TabIndex = 1;
@@ -69,7 +69,7 @@
             // 
             // buttonSelect
             // 
-            this.buttonSelect.Location = new System.Drawing.Point(102, 263);
+            this.buttonSelect.Location = new System.Drawing.Point(127, 263);
             this.buttonSelect.Name = "buttonSelect";
             this.buttonSelect.Size = new System.Drawing.Size(75, 46);
             this.buttonSelect.TabIndex = 4;
@@ -85,13 +85,24 @@
             this.buttonNewBackup.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonNewBackup.ImageIndex = 1;
             this.buttonNewBackup.ImageList = this.ButtonImageList;
-            this.buttonNewBackup.Location = new System.Drawing.Point(52, 185);
+            this.buttonNewBackup.Location = new System.Drawing.Point(77, 185);
             this.buttonNewBackup.Name = "buttonNewBackup";
             this.buttonNewBackup.Size = new System.Drawing.Size(40, 32);
             this.buttonNewBackup.TabIndex = 5;
             this.toolTip.SetToolTip(this.buttonNewBackup, "Create new entry");
             this.buttonNewBackup.UseVisualStyleBackColor = true;
             this.buttonNewBackup.Click += new System.EventHandler(this.buttonNewBackup_Click);
+            // 
+            // ButtonImageList
+            // 
+            this.ButtonImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ButtonImageList.ImageStream")));
+            this.ButtonImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.ButtonImageList.Images.SetKeyName(0, "refreshflat.png");
+            this.ButtonImageList.Images.SetKeyName(1, "plus.png");
+            this.ButtonImageList.Images.SetKeyName(2, "minus.png");
+            this.ButtonImageList.Images.SetKeyName(3, "refreshflatclicked.png");
+            this.ButtonImageList.Images.SetKeyName(4, "plusclicked.png");
+            this.ButtonImageList.Images.SetKeyName(5, "minusclicked.png");
             // 
             // buttonRefresh
             // 
@@ -101,7 +112,7 @@
             this.buttonRefresh.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonRefresh.ImageIndex = 0;
             this.buttonRefresh.ImageList = this.ButtonImageList;
-            this.buttonRefresh.Location = new System.Drawing.Point(123, 185);
+            this.buttonRefresh.Location = new System.Drawing.Point(148, 185);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Size = new System.Drawing.Size(31, 37);
             this.buttonRefresh.TabIndex = 7;
@@ -114,7 +125,7 @@
             this.checkBoxAutoRun.AutoSize = true;
             this.checkBoxAutoRun.Checked = true;
             this.checkBoxAutoRun.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBoxAutoRun.Location = new System.Drawing.Point(106, 239);
+            this.checkBoxAutoRun.Location = new System.Drawing.Point(131, 239);
             this.checkBoxAutoRun.Name = "checkBoxAutoRun";
             this.checkBoxAutoRun.Size = new System.Drawing.Size(71, 17);
             this.checkBoxAutoRun.TabIndex = 9;
@@ -125,7 +136,7 @@
             // 
             // buttonRetrieve
             // 
-            this.buttonRetrieve.Location = new System.Drawing.Point(102, 263);
+            this.buttonRetrieve.Location = new System.Drawing.Point(127, 263);
             this.buttonRetrieve.Name = "buttonRetrieve";
             this.buttonRetrieve.Size = new System.Drawing.Size(75, 23);
             this.buttonRetrieve.TabIndex = 10;
@@ -136,7 +147,7 @@
             // 
             // buttonBackup
             // 
-            this.buttonBackup.Location = new System.Drawing.Point(102, 286);
+            this.buttonBackup.Location = new System.Drawing.Point(127, 286);
             this.buttonBackup.Name = "buttonBackup";
             this.buttonBackup.Size = new System.Drawing.Size(75, 23);
             this.buttonBackup.TabIndex = 11;
@@ -168,7 +179,7 @@
             this.buttonRemove.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.buttonRemove.ImageIndex = 2;
             this.buttonRemove.ImageList = this.ButtonImageList;
-            this.buttonRemove.Location = new System.Drawing.Point(190, 196);
+            this.buttonRemove.Location = new System.Drawing.Point(215, 196);
             this.buttonRemove.Name = "buttonRemove";
             this.buttonRemove.Size = new System.Drawing.Size(39, 10);
             this.buttonRemove.TabIndex = 13;
@@ -176,21 +187,10 @@
             this.buttonRemove.UseVisualStyleBackColor = false;
             this.buttonRemove.Click += new System.EventHandler(this.buttonRemove_Click);
             // 
-            // ButtonImageList
-            // 
-            this.ButtonImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ButtonImageList.ImageStream")));
-            this.ButtonImageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.ButtonImageList.Images.SetKeyName(0, "refreshflat.png");
-            this.ButtonImageList.Images.SetKeyName(1, "plus.png");
-            this.ButtonImageList.Images.SetKeyName(2, "minus.png");
-            this.ButtonImageList.Images.SetKeyName(3, "refreshflatclicked.png");
-            this.ButtonImageList.Images.SetKeyName(4, "plusclicked.png");
-            this.ButtonImageList.Images.SetKeyName(5, "minusclicked.png");
-            // 
             // SeparatorLabel
             // 
             this.SeparatorLabel.AutoSize = true;
-            this.SeparatorLabel.Location = new System.Drawing.Point(12, 217);
+            this.SeparatorLabel.Location = new System.Drawing.Point(37, 217);
             this.SeparatorLabel.Name = "SeparatorLabel";
             this.SeparatorLabel.Size = new System.Drawing.Size(259, 13);
             this.SeparatorLabel.TabIndex = 14;
@@ -198,12 +198,13 @@
             // 
             // WriteTimeListBox
             // 
+            this.WriteTimeListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.WriteTimeListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
             this.WriteTimeListBox.FormattingEnabled = true;
             this.WriteTimeListBox.ItemHeight = 16;
-            this.WriteTimeListBox.Location = new System.Drawing.Point(138, 34);
+            this.WriteTimeListBox.Location = new System.Drawing.Point(175, 36);
             this.WriteTimeListBox.Name = "WriteTimeListBox";
-            this.WriteTimeListBox.Size = new System.Drawing.Size(135, 148);
+            this.WriteTimeListBox.Size = new System.Drawing.Size(143, 144);
             this.WriteTimeListBox.TabIndex = 15;
             this.WriteTimeListBox.SelectedIndexChanged += new System.EventHandler(this.WriteTimeListBox_SelectedIndexChanged);
             // 
@@ -211,7 +212,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 321);
+            this.ClientSize = new System.Drawing.Size(332, 321);
             this.Controls.Add(this.WriteTimeListBox);
             this.Controls.Add(this.SeparatorLabel);
             this.Controls.Add(this.buttonRemove);

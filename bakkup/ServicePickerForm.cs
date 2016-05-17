@@ -7,11 +7,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using bakkup.Clients;
+using bakkup.StorageHandlers;
 
 namespace bakkup
 {
     public partial class ServicePickerForm : Form
     {
+
+        private GoogleDriveStorageHandler _storageHandler;
+
         public ServicePickerForm()
         {
             InitializeComponent();
@@ -45,9 +50,25 @@ namespace bakkup
             GoogleDriveButton.ImageIndex = 0;
         }
 
-        private void GoogleDriveButton_Click(object sender, EventArgs e)
+        private async void GoogleDriveButton_Click(object sender, EventArgs e)
         {
             Program.GD = true;
+
+            _storageHandler = new GoogleDriveStorageHandler();
+            if (!await _storageHandler.InitializeHandler())
+            {
+                //Failed to login.
+                MessageBox.Show("Failed to login to Google Drive!", "Login Failed", MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+                Console.WriteLine("Login Error Occurred:");
+                Console.WriteLine(_storageHandler.LastErrorMessage);
+            }
+            else
+            {
+                Console.WriteLine("Login and bakkup folder initialization successful.");
+                //buttonUpload.Enabled = buttonTestFolder.Enabled = true;
+            }
+
             Close();
         }
 

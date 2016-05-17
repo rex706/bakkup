@@ -30,9 +30,19 @@ namespace bakkup
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new TestForm());
-            //Application.Run(new ServicePickerForm());
-            //Application.Run(new MainForm(args));
+            //Application.Run(new TestForm());
+            Application.Run(new ServicePickerForm());
+
+            while (GD == false && OD == false && DB == false)
+            {
+                DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                if (answer == DialogResult.Cancel)
+                    return;
+                
+                Application.Run(new ServicePickerForm());
+            }
+
+            Application.Run(new MainForm(args));
         }
     }
 }
