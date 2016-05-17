@@ -6,7 +6,6 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace bakkup
 {
@@ -61,7 +60,7 @@ namespace bakkup
             {
                 DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (answer == DialogResult.No)
-                    Close(); //Nkosi Note: Closing the window passed to Application.Run will exit the program.
+                    Close(); 
             }
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
@@ -71,8 +70,6 @@ namespace bakkup
             if (!Directory.Exists(GooglePath))
             {
                 MessageBox.Show("Could not locate Google Drive directory.\n Make sure it is installed and signed in, then try again.", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //Environment.Exit(0);
-                //Nkosi Note: Closing the window passed to Application.Run will exit the program.
                 Close();
             }
 
@@ -294,7 +291,18 @@ namespace bakkup
                     games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
                     games[i] = (valid) + ". " + games[i];
 
-                    WriteTimes[i] = Directory.GetLastWriteTime(gameDirectories[i]).ToString();
+                    //look through all the files in the current path and get the most recent last write date
+                    string[] fileEntries = Directory.GetFiles(gameDirectories[i]);
+                    for (int j = 0; j < fileEntries.Length; j++)
+                    {
+                        DateTime ftime = File.GetLastWriteTime(fileEntries[0]);
+                        DateTime ftime2 = File.GetLastWriteTime(fileEntries[j]);
+
+                        if (ftime < ftime2)
+                            fileEntries[0] = fileEntries[j];
+                    }
+
+                    WriteTimes[i] = Directory.GetLastWriteTime(fileEntries[0]).ToString();
                 }
                 else
                 {
@@ -440,6 +448,39 @@ namespace bakkup
 
                 refreshList();
             }
+            else
+                return;
+        }
+
+        //button up/down events to simulate click down animation
+        private void buttonRefresh_MouseDown(object sender, MouseEventArgs e)
+        {
+            buttonRefresh.ImageIndex = 3;
+        }
+
+        private void buttonRefresh_MouseUp(object sender, MouseEventArgs e)
+        {
+            buttonRefresh.ImageIndex = 0;
+        }
+
+        private void buttonNewBackup_MouseDown(object sender, MouseEventArgs e)
+        {
+            buttonNewBackup.ImageIndex = 4;
+        }
+
+        private void buttonNewBackup_Mouseup(object sender, MouseEventArgs e)
+        {
+            buttonNewBackup.ImageIndex = 1;
+        }
+
+        private void buttonRemove_MouseDown(object sender, MouseEventArgs e)
+        {
+            buttonRemove.ImageIndex = 5;
+        }
+
+        private void buttonRemove_Mouseup(object sender, MouseEventArgs e)
+        {
+            buttonRemove.ImageIndex = 2;
         }
     }
 }

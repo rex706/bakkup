@@ -76,6 +76,8 @@
             this.toolTip.SetToolTip(this.DropBoxButton, "DropBox");
             this.DropBoxButton.UseVisualStyleBackColor = true;
             this.DropBoxButton.Click += new System.EventHandler(this.DropBoxButton_Click);
+            this.DropBoxButton.MouseEnter += new System.EventHandler(this.DropBoxButton_MouseEnter);
+            this.DropBoxButton.MouseLeave += new System.EventHandler(this.DropBoxButton_MouseLeave);
             // 
             // GoogleDriveButton
             // 
@@ -94,6 +96,8 @@
             this.toolTip.SetToolTip(this.GoogleDriveButton, "Google Drive");
             this.GoogleDriveButton.UseVisualStyleBackColor = false;
             this.GoogleDriveButton.Click += new System.EventHandler(this.GoogleDriveButton_Click);
+            this.GoogleDriveButton.MouseEnter += new System.EventHandler(this.GoogleDriveButton_MouseEnter);
+            this.GoogleDriveButton.MouseLeave += new System.EventHandler(this.GoogleDriveButton_MouseLeave);
             // 
             // OneDriveButton
             // 
@@ -110,6 +114,8 @@
             this.toolTip.SetToolTip(this.OneDriveButton, "OneDrive");
             this.OneDriveButton.UseVisualStyleBackColor = true;
             this.OneDriveButton.Click += new System.EventHandler(this.OneDriveButton_Click);
+            this.OneDriveButton.MouseEnter += new System.EventHandler(this.OneDriveButton_MouseEnter);
+            this.OneDriveButton.MouseLeave += new System.EventHandler(this.OneDriveButton_MouseLeave);
             // 
             // ServicePickerForm
             // 

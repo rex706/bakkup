@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using bakkup.Clients;
 using bakkup.StorageHandlers;
 
 namespace bakkup
@@ -19,16 +11,7 @@ namespace bakkup
 
         public ServicePickerForm()
         {
-            InitializeComponent();
-
-            GoogleDriveButton.MouseEnter += new EventHandler(GoogleDriveButton_MouseEnter);
-            GoogleDriveButton.MouseLeave += new EventHandler(GoogleDriveButton_MouseLeave);
-
-            DropBoxButton.MouseEnter += new EventHandler(DropBoxButton_MouseEnter);
-            DropBoxButton.MouseLeave += new EventHandler(DropBoxButton_MouseLeave);
-
-            OneDriveButton.MouseEnter += new EventHandler(OneDriveButton_MouseEnter);
-            OneDriveButton.MouseLeave += new EventHandler(OneDriveButton_MouseLeave);
+            InitializeComponent();           
         }
 
         private void ServicePickerForm_Load(object sender, EventArgs e)

@@ -92,6 +92,8 @@
             this.toolTip.SetToolTip(this.buttonNewBackup, "Create new entry");
             this.buttonNewBackup.UseVisualStyleBackColor = true;
             this.buttonNewBackup.Click += new System.EventHandler(this.buttonNewBackup_Click);
+            this.buttonNewBackup.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonNewBackup_MouseDown);
+            this.buttonNewBackup.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonNewBackup_Mouseup);
             // 
             // ButtonImageList
             // 
@@ -119,6 +121,8 @@
             this.toolTip.SetToolTip(this.buttonRefresh, "Refresh list");
             this.buttonRefresh.UseVisualStyleBackColor = true;
             this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
+            this.buttonRefresh.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonRefresh_MouseDown);
+            this.buttonRefresh.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonRefresh_MouseUp);
             // 
             // checkBoxAutoRun
             // 
@@ -186,6 +190,8 @@
             this.toolTip.SetToolTip(this.buttonRemove, "Remove entry");
             this.buttonRemove.UseVisualStyleBackColor = false;
             this.buttonRemove.Click += new System.EventHandler(this.buttonRemove_Click);
+            this.buttonRemove.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonRemove_MouseDown);
+            this.buttonRemove.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonRemove_Mouseup);
             // 
             // SeparatorLabel
             // 
