@@ -70,6 +70,16 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon icon {
+            get {
+                object obj = ResourceManager.GetObject("icon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Root folder for the Bakkup application. This folder contains saved game data and should not be touched manually. Use the Bakkup application if you would like to move this folder..
         /// </summary>
         internal static string RemoteBakkupFolderDescription {

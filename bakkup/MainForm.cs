@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace bakkup
 {
@@ -19,6 +20,7 @@ namespace bakkup
 
         private string[] gameDirectories;
         private List<string> gameList;
+        private List<string> WriteTimesList;
 
         private int selection;
         private string selectionString;
@@ -105,6 +107,17 @@ namespace bakkup
         //update current selected item
         private void listBoxBakkups_SelectedIndexChanged(object sender, EventArgs e)
         {
+            WriteTimeListBox.SelectedIndex = listBoxBakkups.SelectedIndex;
+
+            selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
+            int dotIdx = selectionString.IndexOf(".");
+            selection = Int32.Parse(selectionString.Substring(0, dotIdx)) - 1;
+        }
+
+        private void WriteTimeListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            listBoxBakkups.SelectedIndex = WriteTimeListBox.SelectedIndex;
+
             selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
             int dotIdx = selectionString.IndexOf(".");
             selection = Int32.Parse(selectionString.Substring(0, dotIdx)) - 1;
@@ -230,7 +243,15 @@ namespace bakkup
 
             //create new directory
             string newDir = SavePath + "\\" + gameName;
-            Directory.CreateDirectory(newDir);
+            try
+            {
+                Directory.CreateDirectory(newDir);
+            }
+            catch(Exception m)
+            {
+                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             //create settings file
             using (StreamWriter sw = File.CreateText(newDir + "\\bakkup.txt"))
@@ -261,6 +282,7 @@ namespace bakkup
         {
             gameDirectories = Directory.GetDirectories(SavePath);
             string[] games = new string[gameDirectories.Length];
+            string[] WriteTimes = new string[gameDirectories.Length];
             int valid = 0;
 
             //get the folder names instead of the entire path string and check if a bakkup.txt exists to be valid
@@ -271,12 +293,21 @@ namespace bakkup
                     valid++;
                     games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
                     games[i] = (valid) + ". " + games[i];
+
+                    WriteTimes[i] = Directory.GetLastWriteTime(gameDirectories[i]).ToString();
                 }
-                else games[i] = "@@@";
+                else
+                {
+                    games[i] = "@@@";
+                    WriteTimes[i] = "@@@";
+                }
             }
 
             gameList = new List<string>(games);
             gameList.RemoveAll(item => item == "@@@");
+
+            WriteTimesList = new List<string>(WriteTimes);
+            WriteTimesList.RemoveAll(item => item == "@@@");
 
             //display number of games found
             label1.ForeColor = Color.Blue;
@@ -301,6 +332,7 @@ namespace bakkup
 
             //populate listbox
             listBoxBakkups.DataSource = gameList;
+            WriteTimeListBox.DataSource = WriteTimesList;
         }
 
         //auto load checkbox

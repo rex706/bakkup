@@ -21,12 +21,17 @@ namespace bakkup
         /// Copies save files to and from a Google Drive folder to keep saves up to date and accessable from anywhere.
         /// </summary>
 
+        public static bool GD = false;
+        public static bool OD = false;
+        public static bool DB = false;
+
         [STAThread]
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new TestForm());
+            //Application.Run(new ServicePickerForm());
             //Application.Run(new MainForm(args));
         }
     }
