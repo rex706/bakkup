@@ -16,3 +16,12 @@ GUI can be skipped and backup/run game automatically by creating a shortcut and 
 TODO:
 - Find a way to deal with multiple users playing and saving at the same time.
 - Find a way to check if files need to be updated or not. Compare last write times?
+
+Future TODO:
+- Fully implement Google Drive, OneDrive and DropBox OAuth2 authentication and syncing functionality. Removes need of having any of the online storage providers installed on the client system.
+- Implement proper cryptographic storage of all OAuth2 authentication strings (client id, client secret, access token and refresh token).
+- Add an option to actively watch game folder locations to perform automatic syncing on file changes.
+- Syncing functionality will be automatic and manual. Automatic syncing intervals can be specified by user.
+- Check if push functionality among the online drive services can be done.
+- Set folder location on remote drive to store save game data.
+- Option to watch remote backup source for changes to save data. Applies changes automatically.

@@ -61,12 +61,29 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        ///   Looks up a localized string similar to Bakkup.
         /// </summary>
-        internal static System.Drawing.Icon icon {
+        internal static string ApplicationName {
             get {
-                object obj = ResourceManager.GetObject("icon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
+                return ResourceManager.GetString("ApplicationName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Root folder for the Bakkup application. This folder contains saved game data and should not be touched manually. Use the Bakkup application if you would like to move this folder..
+        /// </summary>
+        internal static string RemoteBakkupFolderDescription {
+            get {
+                return ResourceManager.GetString("RemoteBakkupFolderDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to 1.4.
+        /// </summary>
+        internal static string Version {
+            get {
+                return ResourceManager.GetString("Version", resourceCulture);
             }
         }
     }
