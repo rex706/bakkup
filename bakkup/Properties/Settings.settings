@@ -3,7 +3,7 @@
   <Profiles />
   <Settings>
     <Setting Name="RemoteBakkupFolderName" Type="System.String" Scope="User">
-      <Value Profile="(Default)">Bakkup Saved Games</Value>
+      <Value Profile="(Default)">bakkup Saved Games</Value>
     </Setting>
   </Settings>
 </SettingsFile>

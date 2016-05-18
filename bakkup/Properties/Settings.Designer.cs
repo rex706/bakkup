@@ -25,7 +25,7 @@ namespace bakkup.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("Bakkup Saved Games")]
+        [global::System.Configuration.DefaultSettingValueAttribute("bakkup Saved Games")]
         public string RemoteBakkupFolderName {
             get {
                 return ((string)(this["RemoteBakkupFolderName"]));

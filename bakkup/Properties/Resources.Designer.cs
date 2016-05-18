@@ -61,7 +61,7 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bakkup.
+        ///   Looks up a localized string similar to bakkup.
         /// </summary>
         internal static string ApplicationName {
             get {
@@ -80,7 +80,7 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Root folder for the Bakkup application. This folder contains saved game data and should not be touched manually. Use the Bakkup application if you would like to move this folder..
+        ///   Looks up a localized string similar to Root folder for the bakkup application. This folder contains saved game data and should not be touched manually. Use the bakkup application if you would like to move this folder..
         /// </summary>
         internal static string RemoteBakkupFolderDescription {
             get {
@@ -89,7 +89,7 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1.4.
+        ///   Looks up a localized string similar to 0.5.
         /// </summary>
         internal static string Version {
             get {
