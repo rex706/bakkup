@@ -104,6 +104,12 @@ namespace bakkup.StorageHandlers
             return true;
         }
 
+        public async Task<List<GameConfig>> RetrieveGameConfigs()
+        {
+            await Task.Delay(100);
+            return null;
+        }
+
         //Method for testing. Remove once folder creation is verified to work.
         public async Task<bool> CreateRemoteTestFolder()
         {
@@ -156,6 +162,10 @@ namespace bakkup.StorageHandlers
         public OAuthClientResult LastError { get; private set; }
 
         public string LastErrorMessage { get; private set; }
+
+        public string ProviderName => "Google Drive";
+
+        public StorageProviders ProviderType => StorageProviders.GoogleDrive;
 
         #endregion
 

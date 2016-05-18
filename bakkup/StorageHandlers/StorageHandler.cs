@@ -9,6 +9,29 @@ using bakkup.Clients;
 namespace bakkup.StorageHandlers
 {
     /// <summary>
+    /// Represents the different supported storage handlers.
+    /// </summary>
+    public enum StorageProviders
+    {
+        /// <summary>
+        /// An invalid value specifying no storage handler.
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Specifies the Google Drive storage handler.
+        /// </summary>
+        GoogleDrive = 1,
+        /// <summary>
+        /// Specifies the OneDrive storage handler.
+        /// </summary>
+        OneDrive = 2,
+        /// <summary>
+        /// Specifies the DropBox storage handler.
+        /// </summary>
+        DropBox = 3
+    }
+
+    /// <summary>
     /// Represents a storage handler that keeps the local game save data in sync with online save data. Should be
     /// extended to handle different online services such as Google Drive, OneDrive, DropBox, etc.
     /// </summary>
@@ -35,6 +58,13 @@ namespace bakkup.StorageHandlers
         Task<bool> DeleteAllRemoteData();
 
         /// <summary>
+        /// Retrieves the list of game configs stored in the GameConfigs.json file in the root of the
+        /// bakkup application folder.
+        /// </summary>
+        /// <returns>A game config file containing the list of games.</returns>
+        Task<List<GameConfig>> RetrieveGameConfigs();
+
+        /// <summary>
         /// Gets the error message of the last message. This should be checked any time a call fails. For the most
         /// part, this just propogates errors from the internal OAuth2Client.
         /// </summary>
@@ -45,5 +75,15 @@ namespace bakkup.StorageHandlers
         /// just propogates errors from the internal OAuth2Client.
         /// </summary>
         OAuthClientResult LastError { get; }
+
+        /// <summary>
+        /// Gets the provider name.
+        /// </summary>
+        string ProviderName { get; }
+
+        /// <summary>
+        /// Gets the type of the provider.
+        /// </summary>
+        StorageProviders ProviderType { get; }
     }
 }

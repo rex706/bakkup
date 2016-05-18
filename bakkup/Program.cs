@@ -20,29 +20,40 @@ namespace bakkup
         /// <summary>
         /// Copies save files to and from a Google Drive folder to keep saves up to date and accessable from anywhere.
         /// </summary>
-
-        public static bool GD = false;
-        public static bool OD = false;
-        public static bool DB = false;
-
         [STAThread]
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new TestForm());
-            Application.Run(new ServicePickerForm());
 
-            while (GD == false && OD == false && DB == false)
-            {
-                DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                if (answer == DialogResult.Cancel)
-                    return;
-                
-                Application.Run(new ServicePickerForm());
-            }
+            /*
+             * Nkosi Note: Application Run should only be called once in the application. Use properties
+             * in the ServicePickerForm class to detect which service was chosen instead of application
+             * wide singleton variables (public static variables any part of the application can access.)
+             * Singletons should generally be avoided when possible.
+             */
 
+            ServicePickerForm form = new ServicePickerForm();
+            form.ShowDialog();
+            if (form.SelectedStorageHandler == null)
+                return; //Form was closed and no storage handler was successfully set, so just exit.
+            //TODO: Pass the successfully initialized storage handler to the MainForm and do stuff with it.
+            //Application.Run(new MainForm(args, form.SelectedStorageHandler));
             Application.Run(new MainForm(args));
+
+            //while (GD == false && OD == false && DB == false)
+            //{
+            //    DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            //    if (answer == DialogResult.Cancel)
+            //        return;
+
+            //    Application.Run(new ServicePickerForm());
+            //}
+
+
         }
     }
 }
+
+
+

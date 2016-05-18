@@ -43,7 +43,7 @@
             this.buttonRemove = new System.Windows.Forms.Button();
             this.SeparatorLabel = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.WriteTimeListBox = new System.Windows.Forms.ListBox();
+            this.listBoxWriteTime = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // listBoxBakkups
@@ -196,24 +196,24 @@
             this.SeparatorLabel.TabIndex = 14;
             this.SeparatorLabel.Text = "__________________________________________";
             // 
-            // WriteTimeListBox
+            // listBoxWriteTime
             // 
-            this.WriteTimeListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.WriteTimeListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.WriteTimeListBox.FormattingEnabled = true;
-            this.WriteTimeListBox.ItemHeight = 16;
-            this.WriteTimeListBox.Location = new System.Drawing.Point(175, 36);
-            this.WriteTimeListBox.Name = "WriteTimeListBox";
-            this.WriteTimeListBox.Size = new System.Drawing.Size(143, 144);
-            this.WriteTimeListBox.TabIndex = 15;
-            this.WriteTimeListBox.SelectedIndexChanged += new System.EventHandler(this.WriteTimeListBox_SelectedIndexChanged);
+            this.listBoxWriteTime.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.listBoxWriteTime.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.listBoxWriteTime.FormattingEnabled = true;
+            this.listBoxWriteTime.ItemHeight = 16;
+            this.listBoxWriteTime.Location = new System.Drawing.Point(175, 36);
+            this.listBoxWriteTime.Name = "listBoxWriteTime";
+            this.listBoxWriteTime.Size = new System.Drawing.Size(143, 144);
+            this.listBoxWriteTime.TabIndex = 15;
+            this.listBoxWriteTime.SelectedIndexChanged += new System.EventHandler(this.listBoxWriteTime_SelectedIndexChanged);
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(332, 321);
-            this.Controls.Add(this.WriteTimeListBox);
+            this.Controls.Add(this.listBoxWriteTime);
             this.Controls.Add(this.SeparatorLabel);
             this.Controls.Add(this.buttonRemove);
             this.Controls.Add(this.linkLabelVersion);
@@ -252,7 +252,7 @@
         private System.Windows.Forms.ImageList ButtonImageList;
         private System.Windows.Forms.Label SeparatorLabel;
         private System.Windows.Forms.ToolTip toolTip;
-        private System.Windows.Forms.ListBox WriteTimeListBox;
+        private System.Windows.Forms.ListBox listBoxWriteTime;
     }
 }
 

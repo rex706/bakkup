@@ -16,22 +16,39 @@ namespace bakkup.Clients
     /// </summary>
     public class GoogleDriveClient : OAuth2Client
     {
+        //Google Drive authorization Url.
         private const string AuthUri = "https://accounts.google.com/o/oauth2/v2/auth";
+        //Google Drive Access and Refresh token Url.
         private const string TokenUri = "https://www.googleapis.com/oauth2/v4/token";
+        //Redirect Url.
         private const string Redirect = "http://localhost/";
 
+        /// <summary>
+        /// The Authorization Endpoint url for Google Drive.
+        /// </summary>
         protected override string AuthorizationEndpoint => AuthUri;
 
+        /// <summary>
+        /// The Token Endpoint url for Google Drive.
+        /// </summary>
         protected override string TokenEndpoint => TokenUri;
 
+        /// <summary>
+        /// The name "Google Drive".
+        /// </summary>
         protected override string ProviderName => "Google Drive";
 
+        /// <summary>
+        /// The redirect url for Google Drive.
+        /// </summary>
         protected override string RedirectUri => Redirect;
 
-        protected override List<string> AuthorizationFormCloseParams
-        {
-            get { return new List<string>() { "error_code", "code" }; }
-        }
+        /// <summary>
+        /// The url parameters the AuthorizationForm should look for to signal the authorization
+        /// process is complete.
+        /// </summary>
+        protected override List<string> AuthorizationFormCloseParams => 
+            new List<string>() { "error_code", "error", "code" };
 
         /// <summary>
         /// Goes through the login process. This will either initialize the client with a stored access token, use

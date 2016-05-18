@@ -87,6 +87,7 @@
     </Compile>
     <Compile Include="Clients\GoogleDriveClient.cs" />
     <Compile Include="Clients\OAuth2Client.cs" />
+    <Compile Include="GameConfig.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
