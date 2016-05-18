@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Windows.Forms;
 using bakkup.StorageHandlers;
+using System.Net;
+using System.IO;
+using System.Diagnostics;
+using System.Drawing;
 
 namespace bakkup
 {
@@ -16,7 +20,36 @@ namespace bakkup
 
         private void ServicePickerForm_Load(object sender, EventArgs e)
         {
+            //check for version updates
+            WebClient client = new WebClient();
 
+            try
+            {   //open the text file using a stream reader
+                using (Stream stream = client.OpenRead("http://textuploader.com/5bjaq/raw"))
+                {
+                    StreamReader reader = new StreamReader(stream);
+                    String latest = reader.ReadToEnd();
+
+                    if (latest != "0.5")
+                    {
+                        DialogResult answer = MessageBox.Show("There is a new update available!\nDownload now?", "Update Found!", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                        if (answer == DialogResult.Yes)
+                        {
+                            Process.Start("https://github.com/rex706/bakkup");
+                            Close();
+                        }
+                        else if (answer == DialogResult.No)
+                        {
+                            SelectProviderLabel.ForeColor= Color.Red;
+                            SelectProviderLabel.Text = "v" + latest + " update available!";
+                        }
+                    }
+                }
+            }
+            catch (Exception m)
+            {
+                //MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         #region GoogleDrive

@@ -44,6 +44,8 @@
             this.SeparatorLabel = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.WriteTimeListBox = new System.Windows.Forms.ListBox();
+            this.ServiceImageList = new System.Windows.Forms.ImageList(this.components);
+            this.ServiceLabel = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // listBoxBakkups
@@ -69,9 +71,9 @@
             // 
             // buttonSelect
             // 
-            this.buttonSelect.Location = new System.Drawing.Point(127, 263);
+            this.buttonSelect.Location = new System.Drawing.Point(127, 267);
             this.buttonSelect.Name = "buttonSelect";
-            this.buttonSelect.Size = new System.Drawing.Size(75, 46);
+            this.buttonSelect.Size = new System.Drawing.Size(75, 36);
             this.buttonSelect.TabIndex = 4;
             this.buttonSelect.Text = "Select";
             this.buttonSelect.UseVisualStyleBackColor = true;
@@ -140,7 +142,7 @@
             // 
             // buttonRetrieve
             // 
-            this.buttonRetrieve.Location = new System.Drawing.Point(127, 263);
+            this.buttonRetrieve.Location = new System.Drawing.Point(127, 262);
             this.buttonRetrieve.Name = "buttonRetrieve";
             this.buttonRetrieve.Size = new System.Drawing.Size(75, 23);
             this.buttonRetrieve.TabIndex = 10;
@@ -214,11 +216,33 @@
             this.WriteTimeListBox.TabIndex = 15;
             this.WriteTimeListBox.SelectedIndexChanged += new System.EventHandler(this.WriteTimeListBox_SelectedIndexChanged);
             // 
+            // ServiceImageList
+            // 
+            this.ServiceImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ServiceImageList.ImageStream")));
+            this.ServiceImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.ServiceImageList.Images.SetKeyName(0, "Google-Drive-icon.png");
+            this.ServiceImageList.Images.SetKeyName(1, "42736.png");
+            this.ServiceImageList.Images.SetKeyName(2, "Dropbox.png");
+            // 
+            // ServiceLabel
+            // 
+            this.ServiceLabel.AutoSize = true;
+            this.ServiceLabel.ImageIndex = 0;
+            this.ServiceLabel.ImageList = this.ServiceImageList;
+            this.ServiceLabel.Location = new System.Drawing.Point(302, 11);
+            this.ServiceLabel.Name = "ServiceLabel";
+            this.ServiceLabel.Size = new System.Drawing.Size(16, 13);
+            this.ServiceLabel.TabIndex = 16;
+            this.ServiceLabel.Text = "   ";
+            this.toolTip.SetToolTip(this.ServiceLabel, "Click to change provider");
+            this.ServiceLabel.Click += new System.EventHandler(this.ServiceLabel_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(332, 321);
+            this.Controls.Add(this.ServiceLabel);
             this.Controls.Add(this.WriteTimeListBox);
             this.Controls.Add(this.SeparatorLabel);
             this.Controls.Add(this.buttonRemove);
@@ -253,12 +277,14 @@
         private System.Windows.Forms.CheckBox checkBoxAutoRun;
         private System.Windows.Forms.Button buttonRetrieve;
         private System.Windows.Forms.Button buttonBackup;
-        private System.Windows.Forms.LinkLabel linkLabelVersion;
         private System.Windows.Forms.Button buttonRemove;
         private System.Windows.Forms.ImageList ButtonImageList;
         private System.Windows.Forms.Label SeparatorLabel;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.ListBox WriteTimeListBox;
+        private System.Windows.Forms.ImageList ServiceImageList;
+        private System.Windows.Forms.Label ServiceLabel;
+        private System.Windows.Forms.LinkLabel linkLabelVersion;
     }
 }
 

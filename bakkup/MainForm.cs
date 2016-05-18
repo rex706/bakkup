@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
+using System.Net;
 
 namespace bakkup
 {
@@ -60,8 +61,15 @@ namespace bakkup
             {
                 DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (answer == DialogResult.No)
-                    Close(); 
+                    Close();
             }
+
+            if (Program.GD == true)
+                ServiceLabel.ImageIndex = 0;
+            else if (Program.OD == true)
+                ServiceLabel.ImageIndex = 1;
+            else if (Program.DB == true)
+                ServiceLabel.ImageIndex = 2;
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
             SavePath = GooglePath + "\\bakkups";
@@ -481,6 +489,12 @@ namespace bakkup
         private void buttonRemove_Mouseup(object sender, MouseEventArgs e)
         {
             buttonRemove.ImageIndex = 2;
+        }
+
+        private void ServiceLabel_Click(object sender, EventArgs e)
+        {
+            Program.SwitchRequest = true;
+            Close();
         }
     }
 }

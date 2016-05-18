@@ -7,10 +7,6 @@
  */
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Windows.Forms;
 
 namespace bakkup
@@ -25,24 +21,38 @@ namespace bakkup
         public static bool OD = false;
         public static bool DB = false;
 
+        public static bool SwitchRequest = false;
+        private static bool FirstStart = true;
+
         [STAThread]
         static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new TestForm());
-            Application.Run(new ServicePickerForm());
 
-            while (GD == false && OD == false && DB == false)
+            while (SwitchRequest == true || FirstStart == true)
             {
-                DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                if (answer == DialogResult.Cancel)
-                    return;
-                
-                Application.Run(new ServicePickerForm());
-            }
+                GD = false;
+                OD = false;
+                DB = false;
 
-            Application.Run(new MainForm(args));
+                SwitchRequest = false;
+                FirstStart = false;
+
+                //Application.Run(new TestForm());
+                Application.Run(new ServicePickerForm());
+
+                while (GD == false && OD == false && DB == false)
+                {
+                    DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+                    if (answer == DialogResult.Cancel)
+                        return;
+                
+                    Application.Run(new ServicePickerForm());
+                }
+
+                Application.Run(new MainForm(args));
+            }
         }
     }
 }
