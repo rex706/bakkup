@@ -92,22 +92,39 @@ namespace bakkup.StorageHandlers
             return true;
         }
 
-        public async Task<bool> DeleteAllRemoteData()
+        public async Task<bool> Sync()
         {
-            await Task.Delay(100);
-            return true;
+            throw new NotImplementedException();
         }
 
-        public async Task<bool> Sync(List<DirectoryInfo> gameSaveDirs)
+        public async Task<bool> Sync(GameConfig game)
         {
-            await Task.Delay(100);
-            return true;
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> DeleteAllRemoteData()
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<List<GameConfig>> RetrieveGameConfigs()
         {
-            await Task.Delay(100);
-            return null;
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> AddNewGame(GameConfig game)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> EditGame(GameConfig oldGameConfig, GameConfig newGameConfig)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<bool> DeleteGame(GameConfig game)
+        {
+            throw new NotImplementedException();
         }
 
         //Method for testing. Remove once folder creation is verified to work.

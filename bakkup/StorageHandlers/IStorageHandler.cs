@@ -44,12 +44,19 @@ namespace bakkup.StorageHandlers
         Task<bool> InitializeHandler();
 
         /// <summary>
-        /// Indicates the StorageHandler should perform a full sync. This means the local and remote save game folders
-        /// should be updated and match with whatever was last modified.
+        /// Indicates the StorageHandler should perform a full sync of all games. This means the local and 
+        /// remote save game data should be updated to match whatever was last modified.
         /// </summary>
-        /// <param name="gameSaveDirs">The list of registered save game directories to work on.</param>
         /// <returns>A value indicating success or failure of the operation.</returns>
-        Task<bool> Sync(List<DirectoryInfo> gameSaveDirs);
+        Task<bool> Sync();
+
+        /// <summary>
+        /// Indicates the StorageHandler should perform a full sync of the given game. This means the local
+        /// and remote save game data should be updated to match whatever was last modified.
+        /// </summary>
+        /// <param name="game">The game to sync the save data of.</param>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        Task<bool> Sync(GameConfig game);
 
         /// <summary>
         /// Deletes all game save data off of the remote drive, including the game save folder.
@@ -59,10 +66,32 @@ namespace bakkup.StorageHandlers
 
         /// <summary>
         /// Retrieves the list of game configs stored in the GameConfigs.json file in the root of the
-        /// bakkup application folder.
+        /// bakkup application folder. Implementers of this method should store a copy of the GameConfig list.
         /// </summary>
         /// <returns>A game config file containing the list of games.</returns>
         Task<List<GameConfig>> RetrieveGameConfigs();
+
+        /// <summary>
+        /// Adds a new game to the storage handler and immediately uploads the game data.
+        /// </summary>
+        /// <param name="game">The game to add.</param>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        Task<bool> AddNewGame(GameConfig game);
+
+        /// <summary>
+        /// Edits the given game in the storage handler. Performs syncing if necessary.
+        /// </summary>
+        /// <param name="oldGameConfig">The old game configuration.</param>
+        /// <param name="newGameConfig">The new game configuration.</param>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        Task<bool> EditGame(GameConfig oldGameConfig, GameConfig newGameConfig);
+
+        /// <summary>
+        /// Deletes the given game in the storage handler.
+        /// </summary>
+        /// <param name="game">The game to delete.</param>
+        /// <returns>A value indicating success or failure of the operation.</returns>
+        Task<bool> DeleteGame(GameConfig game);
 
         /// <summary>
         /// Gets the error message of the last message. This should be checked any time a call fails. For the most

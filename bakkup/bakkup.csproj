@@ -103,7 +103,7 @@
       <DependentUpon>ServicePickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="StorageHandlers\GoogleDriveStorageHandler.cs" />
-    <Compile Include="StorageHandlers\StorageHandler.cs" />
+    <Compile Include="StorageHandlers\IStorageHandler.cs" />
     <Compile Include="StringChiper.cs" />
     <Compile Include="TestForm.cs">
       <SubType>Form</SubType>
