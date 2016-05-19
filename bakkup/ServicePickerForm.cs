@@ -5,6 +5,9 @@ using System.Net;
 using System.IO;
 using System.Diagnostics;
 using System.Drawing;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace bakkup
 {
@@ -18,19 +21,22 @@ namespace bakkup
             InitializeComponent();           
         }
 
-        private void ServicePickerForm_Load(object sender, EventArgs e)
+        private async Task ServicePickerForm_Load(object sender, EventArgs e)
         {
+            //Nkosi Note: Always use asynchronous versions of network and IO methods.
             //check for version updates
-            WebClient client = new WebClient();
+            var client = new HttpClient();
 
             try
-            {   //open the text file using a stream reader
-                using (Stream stream = client.OpenRead("http://textuploader.com/5bjaq/raw"))
+            {    
+                //open the text file using a stream reader
+                using (Stream stream = await client.GetStreamAsync("http://textuploader.com/5bjaq/raw"))
                 {
                     StreamReader reader = new StreamReader(stream);
-                    string latest = reader.ReadToEnd();
-
-                    if (latest != Program.version && Program.FirstStart == true)
+                    Version latest = Version.Parse(reader.ReadToEnd());
+                    Version current = Assembly.GetExecutingAssembly().GetName().Version;
+                    
+                    if (!latest.Equals(current) && Program.FirstStart == true)
                     {
                         Program.FirstStart = false;
 
@@ -46,7 +52,7 @@ namespace bakkup
                             SelectProviderLabel.Text = "v" + latest + " update available!";
                         }
                     }
-                    else if (latest != Program.version)
+                    else if (!latest.Equals(current))
                     {
                         SelectProviderLabel.ForeColor = Color.Red;
                         SelectProviderLabel.Text = "v" + latest + " update available!";

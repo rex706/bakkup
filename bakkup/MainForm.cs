@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
 
 namespace bakkup
 {
@@ -71,7 +72,7 @@ namespace bakkup
             else if (Program.DB == true)
                 ServiceLabel.ImageIndex = 2;
 
-            linkLabelVersion.Text = "v" + Program.version;
+            linkLabelVersion.Text = "v" + Assembly.GetExecutingAssembly().GetName().Version;
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
             SavePath = GooglePath + "\\bakkups";

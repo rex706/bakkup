@@ -17,14 +17,14 @@ namespace bakkup
         /// Copies save files to and from a Google Drive folder to keep saves up to date and accessable from anywhere.
         /// </summary>
 
-        public static bool GD = false;
-        public static bool OD = false;
-        public static bool DB = false;
+        //Nkosi Note: Do not use program wide singletons when they aren't necessary.
+        //public static bool GD = false;
+        //public static bool OD = false;
+        //public static bool DB = false;
 
-        public static bool SwitchRequest = false;
-        public static bool FirstStart = true;
-
-        public static string version = "0.5";
+        //public static bool SwitchRequest = false;
+        //public static bool FirstStart = true; 
+        //Nkosi Note: This variable value will not persist after program restart.
 
         [STAThread]
         static void Main(string[] args)

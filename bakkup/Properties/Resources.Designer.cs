@@ -89,7 +89,7 @@ namespace bakkup.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1.4.
+        ///   Looks up a localized string similar to 0.5.
         /// </summary>
         internal static string Version {
             get {
