@@ -43,9 +43,9 @@
             this.buttonRemove = new System.Windows.Forms.Button();
             this.SeparatorLabel = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
-            this.WriteTimeListBox = new System.Windows.Forms.ListBox();
-            this.ServiceImageList = new System.Windows.Forms.ImageList(this.components);
             this.ServiceLabel = new System.Windows.Forms.Label();
+            this.ServiceImageList = new System.Windows.Forms.ImageList(this.components);
+            this.WriteTimeListBox = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
             // listBoxBakkups
@@ -169,11 +169,11 @@
             this.linkLabelVersion.LinkColor = System.Drawing.Color.Black;
             this.linkLabelVersion.Location = new System.Drawing.Point(9, 9);
             this.linkLabelVersion.Name = "linkLabelVersion";
-            this.linkLabelVersion.Size = new System.Drawing.Size(28, 13);
+            this.linkLabelVersion.Size = new System.Drawing.Size(20, 13);
             this.linkLabelVersion.TabIndex = 12;
             this.linkLabelVersion.TabStop = true;
             this.linkLabelVersion.Tag = "";
-            this.linkLabelVersion.Text = "v0.5";
+            this.linkLabelVersion.Text = "v#";
             this.linkLabelVersion.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelVersion_LinkClicked);
             // 
             // buttonRemove
@@ -204,26 +204,6 @@
             this.SeparatorLabel.TabIndex = 14;
             this.SeparatorLabel.Text = "__________________________________________";
             // 
-            // WriteTimeListBox
-            // 
-            this.WriteTimeListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.WriteTimeListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
-            this.WriteTimeListBox.FormattingEnabled = true;
-            this.WriteTimeListBox.ItemHeight = 16;
-            this.WriteTimeListBox.Location = new System.Drawing.Point(175, 36);
-            this.WriteTimeListBox.Name = "WriteTimeListBox";
-            this.WriteTimeListBox.Size = new System.Drawing.Size(143, 144);
-            this.WriteTimeListBox.TabIndex = 15;
-            this.WriteTimeListBox.SelectedIndexChanged += new System.EventHandler(this.WriteTimeListBox_SelectedIndexChanged);
-            // 
-            // ServiceImageList
-            // 
-            this.ServiceImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ServiceImageList.ImageStream")));
-            this.ServiceImageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.ServiceImageList.Images.SetKeyName(0, "Google-Drive-icon.png");
-            this.ServiceImageList.Images.SetKeyName(1, "42736.png");
-            this.ServiceImageList.Images.SetKeyName(2, "Dropbox.png");
-            // 
             // ServiceLabel
             // 
             this.ServiceLabel.AutoSize = true;
@@ -236,6 +216,26 @@
             this.ServiceLabel.Text = "   ";
             this.toolTip.SetToolTip(this.ServiceLabel, "Click to change provider");
             this.ServiceLabel.Click += new System.EventHandler(this.ServiceLabel_Click);
+            // 
+            // ServiceImageList
+            // 
+            this.ServiceImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ServiceImageList.ImageStream")));
+            this.ServiceImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.ServiceImageList.Images.SetKeyName(0, "Google-Drive-icon.png");
+            this.ServiceImageList.Images.SetKeyName(1, "42736.png");
+            this.ServiceImageList.Images.SetKeyName(2, "Dropbox.png");
+            // 
+            // WriteTimeListBox
+            // 
+            this.WriteTimeListBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.WriteTimeListBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F);
+            this.WriteTimeListBox.FormattingEnabled = true;
+            this.WriteTimeListBox.ItemHeight = 16;
+            this.WriteTimeListBox.Location = new System.Drawing.Point(175, 36);
+            this.WriteTimeListBox.Name = "WriteTimeListBox";
+            this.WriteTimeListBox.Size = new System.Drawing.Size(143, 144);
+            this.WriteTimeListBox.TabIndex = 15;
+            this.WriteTimeListBox.SelectedIndexChanged += new System.EventHandler(this.WriteTimeListBox_SelectedIndexChanged);
             // 
             // MainForm
             // 

@@ -71,6 +71,8 @@ namespace bakkup
             else if (Program.DB == true)
                 ServiceLabel.ImageIndex = 2;
 
+            linkLabelVersion.Text = "v" + Program.version;
+
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
             SavePath = GooglePath + "\\bakkups";
 

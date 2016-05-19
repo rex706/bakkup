@@ -28,10 +28,12 @@ namespace bakkup
                 using (Stream stream = client.OpenRead("http://textuploader.com/5bjaq/raw"))
                 {
                     StreamReader reader = new StreamReader(stream);
-                    String latest = reader.ReadToEnd();
+                    string latest = reader.ReadToEnd();
 
-                    if (latest != "0.5")
+                    if (latest != Program.version && Program.FirstStart == true)
                     {
+                        Program.FirstStart = false;
+
                         DialogResult answer = MessageBox.Show("There is a new update available!\nDownload now?", "Update Found!", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
                         if (answer == DialogResult.Yes)
                         {
@@ -43,6 +45,11 @@ namespace bakkup
                             SelectProviderLabel.ForeColor= Color.Red;
                             SelectProviderLabel.Text = "v" + latest + " update available!";
                         }
+                    }
+                    else if (latest != Program.version)
+                    {
+                        SelectProviderLabel.ForeColor = Color.Red;
+                        SelectProviderLabel.Text = "v" + latest + " update available!";
                     }
                 }
             }
@@ -74,8 +81,7 @@ namespace bakkup
             if (!await _storageHandler.InitializeHandler())
             {
                 //Failed to login.
-                MessageBox.Show("Failed to login to Google Drive!", "Login Failed", MessageBoxButtons.OK,
-                    MessageBoxIcon.Exclamation);
+                MessageBox.Show("Failed to login to Google Drive!", "Login Failed", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 Console.WriteLine("Login Error Occurred:");
                 Console.WriteLine(_storageHandler.LastErrorMessage);
             }

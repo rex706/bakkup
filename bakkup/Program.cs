@@ -22,7 +22,9 @@ namespace bakkup
         public static bool DB = false;
 
         public static bool SwitchRequest = false;
-        private static bool FirstStart = true;
+        public static bool FirstStart = true;
+
+        public static string version = "0.5";
 
         [STAThread]
         static void Main(string[] args)
@@ -37,7 +39,6 @@ namespace bakkup
                 DB = false;
 
                 SwitchRequest = false;
-                FirstStart = false;
 
                 //Application.Run(new TestForm());
                 Application.Run(new ServicePickerForm());
@@ -52,6 +53,8 @@ namespace bakkup
                 }
 
                 Application.Run(new MainForm(args));
+
+                FirstStart = false;
             }
         }
     }
