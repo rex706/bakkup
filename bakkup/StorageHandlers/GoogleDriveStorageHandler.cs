@@ -36,14 +36,22 @@ namespace bakkup.StorageHandlers
             LastErrorMessage = "Operation Completed Successfully";
         }
 
+        //TODO: Start implementing the IStorageHandler interface for Google Drive.
         #region Storage Handler Implementation
 
         public async Task<bool> InitializeHandler()
         {
             //First, login.
-            bool result = await _client.Login();
+            var result = await _client.Login();
             if (!result)
-                return false; //Couldn't login.
+            {
+                //Couldn't login. Record the last error messages of the client and store in
+                //the handler.
+                LastError = _client.LastError;
+                LastErrorMessage = _client.LastErrorMessage;
+                return false; 
+            }
+                
 
             //Check that the Bakkup folder exists on the drive. Create it if it does not exist.
             var fileList = await _api.ListRootFiles();

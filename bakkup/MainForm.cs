@@ -1,4 +1,6 @@
-﻿using System;
+﻿//TODO: Add a place within MainForm to check for updates.
+
+using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -7,13 +9,16 @@ using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
+using System.Threading.Tasks;
+using bakkup.StorageHandlers;
 
 namespace bakkup
 {
     public partial class MainForm : Form
     {
-        //Nkosi Note: None of these variables should be declared public.
+        #region Variables
 
         private string argument = null;
         private bool argFlag = false;
@@ -33,7 +38,12 @@ namespace bakkup
         private string exePath;
         private string parameters;
 
-        //Nkosi Note: UI elements should always have a default constructor that takes no parameters.
+        private IStorageHandler _storageHandler;
+
+        #endregion
+
+        #region Constructors
+
         public MainForm()
         {
             InitializeComponent();
@@ -55,9 +65,13 @@ namespace bakkup
             InitializeComponent();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        #endregion
+
+        #region Window Event Listeners
+
+        private async void MainForm_Load(object sender, EventArgs e)
         {
-            //check for internet
+            //Check for internet
             if (Util.CheckForInternetConnection() == false)
             {
                 DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
@@ -65,12 +79,52 @@ namespace bakkup
                     Close();
             }
 
-            if (Program.GD == true)
-                ServiceLabel.ImageIndex = 0;
-            else if (Program.OD == true)
-                ServiceLabel.ImageIndex = 1;
-            else if (Program.DB == true)
-                ServiceLabel.ImageIndex = 2;
+            //Check for a new version.
+            int updateResult = await CheckForUpdate();
+            if (updateResult == -1)
+            {
+                //Some error occurred.
+                //TODO: Handle this error.
+            }
+            else if (updateResult == 1)
+            {
+                //An update is available, but user has chosen not to update.
+                //TODO: Update the UI to show that an update is available.
+            }
+            else if (updateResult == 2)
+            {
+                //An update is available, and the user has chosen to update.
+                //TODO: Exit the application. Later, initiate a process that downloads
+                //new updated binaries.
+                Close();
+            }
+
+            //Show the provider dialog.
+            var form = new ServicePickerForm();
+            form.ShowDialog();
+            if (form.SelectedStorageHandler == null)
+            {
+                //Provider window was closed and no storage handler was successfully set, so just exit.
+                Close();
+                return;
+            }
+
+            //Set the new storage handler. It was also initialized 
+            _storageHandler = form.SelectedStorageHandler;
+
+            //Show the image of the currently selected storage handler.
+            switch (_storageHandler.ProviderType)
+            {
+                case StorageProviders.GoogleDrive:
+                    serviceLabel.ImageIndex = 0;
+                    break;
+                case StorageProviders.OneDrive:
+                    serviceLabel.ImageIndex = 1;
+                    break;
+                case StorageProviders.DropBox:
+                    serviceLabel.ImageIndex = 2;
+                    break;
+            }
 
             linkLabelVersion.Text = "v" + Assembly.GetExecutingAssembly().GetName().Version;
 
@@ -91,7 +145,7 @@ namespace bakkup
                 Directory.CreateDirectory(SavePath);
             }
 
-            refreshList();
+            RefreshList();
 
             //if user input arguments
             if (argFlag == true)
@@ -265,7 +319,7 @@ namespace bakkup
             {
                 Directory.CreateDirectory(newDir);
             }
-            catch(Exception m)
+            catch (Exception m)
             {
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
@@ -286,82 +340,13 @@ namespace bakkup
             label1.ForeColor = Color.Green;
             label1.Text = "Cloud Backup Complete!";
 
-            refreshList();
+            RefreshList();
         }
 
         //refresh
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
-            refreshList();
-        }
-
-        //refresh and populate listbox
-        private void refreshList()
-        {
-            gameDirectories = Directory.GetDirectories(SavePath);
-            string[] games = new string[gameDirectories.Length];
-            string[] WriteTimes = new string[gameDirectories.Length];
-            int valid = 0;
-
-            //get the folder names instead of the entire path string and check if a bakkup.txt exists to be valid
-            for (int i = 0; i < gameDirectories.Length; i++)
-            {
-                if (File.Exists(gameDirectories[i] + "\\bakkup.txt"))
-                {
-                    valid++;
-                    games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
-                    games[i] = (valid) + ". " + games[i];
-
-                    //look through all the files in the current path and get the most recent last write date
-                    string[] fileEntries = Directory.GetFiles(gameDirectories[i]);
-                    for (int j = 0; j < fileEntries.Length; j++)
-                    {
-                        DateTime ftime = File.GetLastWriteTime(fileEntries[0]);
-                        DateTime ftime2 = File.GetLastWriteTime(fileEntries[j]);
-
-                        if (ftime < ftime2)
-                            fileEntries[0] = fileEntries[j];
-                    }
-
-                    WriteTimes[i] = Directory.GetLastWriteTime(fileEntries[0]).ToString();
-                }
-                else
-                {
-                    games[i] = "@@@";
-                    WriteTimes[i] = "@@@";
-                }
-            }
-
-            gameList = new List<string>(games);
-            gameList.RemoveAll(item => item == "@@@");
-
-            WriteTimesList = new List<string>(WriteTimes);
-            WriteTimesList.RemoveAll(item => item == "@@@");
-
-            //display number of games found
-            label1.ForeColor = Color.Blue;
-            if (gameList.Count > 1)
-            {
-                label1.Text = gameList.Count + " bakkups found!";
-                buttonSelect.Enabled = true;
-                checkBoxAutoRun.Enabled = true;
-            }
-            else if (gameList.Count == 0)
-            {
-                label1.Text = "No bakkups found!";
-                buttonSelect.Enabled = false;
-                checkBoxAutoRun.Enabled = false;
-            }
-            else
-            {
-                label1.Text = gameList.Count + " bakkup found!";
-                buttonSelect.Enabled = true;
-                checkBoxAutoRun.Enabled = true;
-            }
-
-            //populate listbox
-            listBoxBakkups.DataSource = gameList;
-            listBoxWriteTime.DataSource = WriteTimesList;
+            RefreshList();
         }
 
         //auto load checkbox
@@ -467,7 +452,7 @@ namespace bakkup
 
                 Directory.Delete(SavePath + "\\" + gameName, true);
 
-                refreshList();
+                RefreshList();
             }
             else
                 return;
@@ -504,10 +489,145 @@ namespace bakkup
             buttonRemove.ImageIndex = 2;
         }
 
-        private void ServiceLabel_Click(object sender, EventArgs e)
+        private async void serviceLabel_Click(object sender, EventArgs e)
         {
-            Program.SwitchRequest = true;
-            Close();
+            //Show the service provider selector window.
+            var window = new ServicePickerForm();
+            window.LoadedProvider = _storageHandler.ProviderType;
+            window.ShowDialog();
+            //Do nothing if either no service provider was selected, or the service provider
+            //is the same as the currently loaded provider. This way, the current storage
+            //handler remains loaded and its state is maintained.
+            if (window.SelectedStorageHandler == null ||
+                window.SelectedStorageHandler.ProviderType == _storageHandler.ProviderType)
+                return;
+
+            //Cleanup the current storage handler.
+
+            //Initialize the newly selected storage handler.
+
+
+            //Reload the Mainform with the new storage handler data.
+
         }
+
+        #endregion
+
+        #region Private Methods
+
+        //Checks if an update is available. 
+        //-1 for check error, 0 for no update, 1 for update is available, 2 for perform update.
+        private static async Task<int> CheckForUpdate()
+        {
+            //Nkosi Note: Always use asynchronous versions of network and IO methods.
+
+            //Check for version updates
+            var client = new HttpClient();
+            client.Timeout = new TimeSpan(0, 0, 0, 10);
+            try
+            {
+                //open the text file using a stream reader
+                using (Stream stream = await client.GetStreamAsync("http://textuploader.com/5bjaq/raw"))
+                {
+                    StreamReader reader = new StreamReader(stream);
+                    Version latest = Version.Parse(reader.ReadToEnd());
+                    Version current = Assembly.GetExecutingAssembly().GetName().Version;
+
+                    if (latest.Major != current.Major || latest.Minor != current.Minor)
+                    {
+                        DialogResult answer = MessageBox.Show("There is a new update available!\nDownload now?", "Update Found!", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                        if (answer == DialogResult.Yes)
+                        {
+                            //TODO: Later on, remove this and replace with automated process of downloading new binaries.
+                            Process.Start("https://github.com/rex706/bakkup");
+                            //Update is available, and user wants to update. Requires app to close.
+                            return 2;
+                        }
+                        //Update is available, but user chose not to update just yet.
+                        return 1;
+                    }
+                }
+
+                //No update available.
+                return 0;
+            }
+            catch (Exception m)
+            {
+                MessageBox.Show("Failed to check for update.\n" + m.Message,
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return -1;
+            }
+        }
+
+        //refresh and populate listbox
+        private void RefreshList()
+        {
+            gameDirectories = Directory.GetDirectories(SavePath);
+            string[] games = new string[gameDirectories.Length];
+            string[] WriteTimes = new string[gameDirectories.Length];
+            int valid = 0;
+
+            //get the folder names instead of the entire path string and check if a bakkup.txt exists to be valid
+            for (int i = 0; i < gameDirectories.Length; i++)
+            {
+                if (File.Exists(gameDirectories[i] + "\\bakkup.txt"))
+                {
+                    valid++;
+                    games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
+                    games[i] = (valid) + ". " + games[i];
+
+                    //look through all the files in the current path and get the most recent last write date
+                    string[] fileEntries = Directory.GetFiles(gameDirectories[i]);
+                    for (int j = 0; j < fileEntries.Length; j++)
+                    {
+                        DateTime ftime = File.GetLastWriteTime(fileEntries[0]);
+                        DateTime ftime2 = File.GetLastWriteTime(fileEntries[j]);
+
+                        if (ftime < ftime2)
+                            fileEntries[0] = fileEntries[j];
+                    }
+
+                    WriteTimes[i] = Directory.GetLastWriteTime(fileEntries[0]).ToString();
+                }
+                else
+                {
+                    games[i] = "@@@";
+                    WriteTimes[i] = "@@@";
+                }
+            }
+
+            gameList = new List<string>(games);
+            gameList.RemoveAll(item => item == "@@@");
+
+            WriteTimesList = new List<string>(WriteTimes);
+            WriteTimesList.RemoveAll(item => item == "@@@");
+
+            //display number of games found
+            label1.ForeColor = Color.Blue;
+            if (gameList.Count > 1)
+            {
+                label1.Text = gameList.Count + " bakkups found!";
+                buttonSelect.Enabled = true;
+                checkBoxAutoRun.Enabled = true;
+            }
+            else if (gameList.Count == 0)
+            {
+                label1.Text = "No bakkups found!";
+                buttonSelect.Enabled = false;
+                checkBoxAutoRun.Enabled = false;
+            }
+            else
+            {
+                label1.Text = gameList.Count + " bakkup found!";
+                buttonSelect.Enabled = true;
+                checkBoxAutoRun.Enabled = true;
+            }
+
+            //populate listbox
+            listBoxBakkups.DataSource = gameList;
+            listBoxWriteTime.DataSource = WriteTimesList;
+        }
+
+        #endregion
     }
 }

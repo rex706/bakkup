@@ -43,6 +43,8 @@
             this.buttonRemove = new System.Windows.Forms.Button();
             this.SeparatorLabel = new System.Windows.Forms.Label();
             this.toolTip = new System.Windows.Forms.ToolTip(this.components);
+            this.serviceLabel = new System.Windows.Forms.Label();
+            this.ServiceImageList = new System.Windows.Forms.ImageList(this.components);
             this.listBoxWriteTime = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
             // 
@@ -69,9 +71,9 @@
             // 
             // buttonSelect
             // 
-            this.buttonSelect.Location = new System.Drawing.Point(127, 263);
+            this.buttonSelect.Location = new System.Drawing.Point(127, 267);
             this.buttonSelect.Name = "buttonSelect";
-            this.buttonSelect.Size = new System.Drawing.Size(75, 46);
+            this.buttonSelect.Size = new System.Drawing.Size(75, 36);
             this.buttonSelect.TabIndex = 4;
             this.buttonSelect.Text = "Select";
             this.buttonSelect.UseVisualStyleBackColor = true;
@@ -92,6 +94,8 @@
             this.toolTip.SetToolTip(this.buttonNewBackup, "Create new entry");
             this.buttonNewBackup.UseVisualStyleBackColor = true;
             this.buttonNewBackup.Click += new System.EventHandler(this.buttonNewBackup_Click);
+            this.buttonNewBackup.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonNewBackup_MouseDown);
+            this.buttonNewBackup.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonNewBackup_Mouseup);
             // 
             // ButtonImageList
             // 
@@ -119,6 +123,8 @@
             this.toolTip.SetToolTip(this.buttonRefresh, "Refresh list");
             this.buttonRefresh.UseVisualStyleBackColor = true;
             this.buttonRefresh.Click += new System.EventHandler(this.buttonRefresh_Click);
+            this.buttonRefresh.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonRefresh_MouseDown);
+            this.buttonRefresh.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonRefresh_MouseUp);
             // 
             // checkBoxAutoRun
             // 
@@ -136,7 +142,7 @@
             // 
             // buttonRetrieve
             // 
-            this.buttonRetrieve.Location = new System.Drawing.Point(127, 263);
+            this.buttonRetrieve.Location = new System.Drawing.Point(127, 262);
             this.buttonRetrieve.Name = "buttonRetrieve";
             this.buttonRetrieve.Size = new System.Drawing.Size(75, 23);
             this.buttonRetrieve.TabIndex = 10;
@@ -163,11 +169,11 @@
             this.linkLabelVersion.LinkColor = System.Drawing.Color.Black;
             this.linkLabelVersion.Location = new System.Drawing.Point(9, 9);
             this.linkLabelVersion.Name = "linkLabelVersion";
-            this.linkLabelVersion.Size = new System.Drawing.Size(28, 13);
+            this.linkLabelVersion.Size = new System.Drawing.Size(20, 13);
             this.linkLabelVersion.TabIndex = 12;
             this.linkLabelVersion.TabStop = true;
             this.linkLabelVersion.Tag = "";
-            this.linkLabelVersion.Text = "v0.5";
+            this.linkLabelVersion.Text = "v#";
             this.linkLabelVersion.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelVersion_LinkClicked);
             // 
             // buttonRemove
@@ -186,6 +192,8 @@
             this.toolTip.SetToolTip(this.buttonRemove, "Remove entry");
             this.buttonRemove.UseVisualStyleBackColor = false;
             this.buttonRemove.Click += new System.EventHandler(this.buttonRemove_Click);
+            this.buttonRemove.MouseDown += new System.Windows.Forms.MouseEventHandler(this.buttonRemove_MouseDown);
+            this.buttonRemove.MouseUp += new System.Windows.Forms.MouseEventHandler(this.buttonRemove_Mouseup);
             // 
             // SeparatorLabel
             // 
@@ -195,6 +203,27 @@
             this.SeparatorLabel.Size = new System.Drawing.Size(259, 13);
             this.SeparatorLabel.TabIndex = 14;
             this.SeparatorLabel.Text = "__________________________________________";
+            // 
+            // serviceLabel
+            // 
+            this.serviceLabel.AutoSize = true;
+            this.serviceLabel.ImageIndex = 0;
+            this.serviceLabel.ImageList = this.ServiceImageList;
+            this.serviceLabel.Location = new System.Drawing.Point(302, 11);
+            this.serviceLabel.Name = "serviceLabel";
+            this.serviceLabel.Size = new System.Drawing.Size(16, 13);
+            this.serviceLabel.TabIndex = 16;
+            this.serviceLabel.Text = "   ";
+            this.toolTip.SetToolTip(this.serviceLabel, "Click to change provider");
+            this.serviceLabel.Click += new System.EventHandler(this.serviceLabel_Click);
+            // 
+            // ServiceImageList
+            // 
+            this.ServiceImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("ServiceImageList.ImageStream")));
+            this.ServiceImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.ServiceImageList.Images.SetKeyName(0, "Google-Drive-icon.png");
+            this.ServiceImageList.Images.SetKeyName(1, "42736.png");
+            this.ServiceImageList.Images.SetKeyName(2, "Dropbox.png");
             // 
             // listBoxWriteTime
             // 
@@ -213,6 +242,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(332, 321);
+            this.Controls.Add(this.serviceLabel);
             this.Controls.Add(this.listBoxWriteTime);
             this.Controls.Add(this.SeparatorLabel);
             this.Controls.Add(this.buttonRemove);
@@ -247,12 +277,13 @@
         private System.Windows.Forms.CheckBox checkBoxAutoRun;
         private System.Windows.Forms.Button buttonRetrieve;
         private System.Windows.Forms.Button buttonBackup;
-        private System.Windows.Forms.LinkLabel linkLabelVersion;
         private System.Windows.Forms.Button buttonRemove;
         private System.Windows.Forms.ImageList ButtonImageList;
         private System.Windows.Forms.Label SeparatorLabel;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.ListBox listBoxWriteTime;
+        private System.Windows.Forms.ImageList ServiceImageList;
+        private System.Windows.Forms.Label serviceLabel;
+        private System.Windows.Forms.LinkLabel linkLabelVersion;
     }
 }
-

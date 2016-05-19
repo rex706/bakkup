@@ -8,60 +8,43 @@ using System.Drawing;
 using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
+using bakkup.Clients;
 
 namespace bakkup
 {
     public partial class ServicePickerForm : Form
     {
-        //private GoogleDriveStorageHandler _storageHandler;
-
         public ServicePickerForm()
         {
-            InitializeComponent();           
+            InitializeComponent();
         }
 
-        private async Task ServicePickerForm_Load(object sender, EventArgs e)
+        /// <summary>
+        /// Gets the initialized storage handler that was chosen by the user. Null if no storage handler
+        /// was selected.
+        /// </summary>
+        public IStorageHandler SelectedStorageHandler { get; private set; }
+
+        /// <summary>
+        /// Sets the storage provider that is loaded in the application. This will disable the
+        /// button for the provider, since it is already loaded.
+        /// </summary>
+        public StorageProviders LoadedProvider
         {
-            //Nkosi Note: Always use asynchronous versions of network and IO methods.
-            //check for version updates
-            var client = new HttpClient();
-
-            try
-            {    
-                //open the text file using a stream reader
-                using (Stream stream = await client.GetStreamAsync("http://textuploader.com/5bjaq/raw"))
-                {
-                    StreamReader reader = new StreamReader(stream);
-                    Version latest = Version.Parse(reader.ReadToEnd());
-                    Version current = Assembly.GetExecutingAssembly().GetName().Version;
-                    
-                    if (!latest.Equals(current) && Program.FirstStart == true)
-                    {
-                        Program.FirstStart = false;
-
-                        DialogResult answer = MessageBox.Show("There is a new update available!\nDownload now?", "Update Found!", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
-                        if (answer == DialogResult.Yes)
-                        {
-                            Process.Start("https://github.com/rex706/bakkup");
-                            Close();
-                        }
-                        else if (answer == DialogResult.No)
-                        {
-                            SelectProviderLabel.ForeColor= Color.Red;
-                            SelectProviderLabel.Text = "v" + latest + " update available!";
-                        }
-                    }
-                    else if (!latest.Equals(current))
-                    {
-                        SelectProviderLabel.ForeColor = Color.Red;
-                        SelectProviderLabel.Text = "v" + latest + " update available!";
-                    }
-                }
-            }
-            catch (Exception m)
+            set
             {
-                //MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (value == StorageProviders.GoogleDrive)
+                    GoogleDriveButton.Enabled = false;
+                else if (value == StorageProviders.OneDrive)
+                    OneDriveButton.Enabled = false;
+                else if (value == StorageProviders.DropBox)
+                    DropBoxButton.Enabled = false;
             }
+        }
+
+        private void ServicePickerForm_Load(object sender, EventArgs e)
+        {
+            
         }
 
         //Nkosi Note: Use this method to take advantage of the fact that IStorageHandler is an interface. 

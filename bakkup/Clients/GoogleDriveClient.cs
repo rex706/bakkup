@@ -118,10 +118,16 @@ namespace bakkup.Clients
             //"code" parameter with the code to use to get the initial access token.
             var builder = new UriBuilder(authorizeUrl);
             var query = HttpUtility.ParseQueryString(builder.Query);
-            if (query["error_code"] != null)
+            if (query["error_code"] != null || query["error"] != null)
             {
                 //Error while trying to access user's account.
-                if (query["error_code"].StartsWith("access_denied"))
+                var errorCode = "";
+                if (query["error_code"] != null)
+                    errorCode = query["error_code"];
+                else if (query["error"] != null)
+                    errorCode = query["error"];
+
+                if (errorCode.StartsWith("access_denied"))
                 {
                     LastErrorMessage = "User denied access to their Google Drive.";
                     LastError = OAuthClientResult.UserCancelled;

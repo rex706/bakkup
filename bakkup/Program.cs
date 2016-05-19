@@ -7,27 +7,34 @@
  */
 
 using System;
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace bakkup
 {
-    static class Program
+    internal static class Program
     {
-        /// <summary>
-        /// Copies save files to and from a Google Drive folder to keep saves up to date and accessable from anywhere.
-        /// </summary>
-
         //Nkosi Note: Do not use program wide singletons when they aren't necessary.
+
+        //Not necessary variables. ServicePickerForm.SelectedStorageHandler resolves these.
         //public static bool GD = false;
         //public static bool OD = false;
         //public static bool DB = false;
 
+        //Not a necessary singleton variable. Simply re-open the ServicePickerForm window within the
+        //MainForm code. Refer to MainForm.serviceLabel_Click method.
         //public static bool SwitchRequest = false;
-        //public static bool FirstStart = true; 
-        //Nkosi Note: This variable value will not persist after program restart.
+        //No longer necessary because SwitchRequest has become unnecessary.
+        //public static bool FirstStart = true;  
 
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -38,13 +45,6 @@ namespace bakkup
              * wide singleton variables (public static variables any part of the application can access.)
              * Singletons should generally be avoided when possible.
              */
-
-            ServicePickerForm form = new ServicePickerForm();
-            form.ShowDialog();
-            if (form.SelectedStorageHandler == null)
-                return; //Form was closed and no storage handler was successfully set, so just exit.
-            //TODO: Pass the successfully initialized storage handler to the MainForm and do stuff with it.
-            //Application.Run(new MainForm(args, form.SelectedStorageHandler));
             Application.Run(new MainForm(args));
 
             //while (GD == false && OD == false && DB == false)
@@ -69,7 +69,7 @@ namespace bakkup
             //    DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
             //    if (answer == DialogResult.Cancel)
             //        return;
-                
+
             //    Application.Run(new ServicePickerForm());
             //}
 
