@@ -38,6 +38,7 @@
             this.ClientSize = new System.Drawing.Size(534, 611);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "AuthorizeForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Login To X";
             this.ResumeLayout(false);
 

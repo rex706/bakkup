@@ -115,16 +115,26 @@ namespace bakkup
         //update current selected item
         private void listBoxBakkups_SelectedIndexChanged(object sender, EventArgs e)
         {
-            WriteTimeListBox.SelectedIndex = listBoxBakkups.SelectedIndex;
+            //Issue with ListBox's in Windows Forms. There can be calls here when the number
+            //of selected items is 0. When this happens, do nothing.
+            if (listBoxWriteTime.SelectedItems.Count == 0)
+                return;
+
+            listBoxWriteTime.SelectedIndex = listBoxBakkups.SelectedIndex;
 
             selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
             int dotIdx = selectionString.IndexOf(".");
             selection = Int32.Parse(selectionString.Substring(0, dotIdx)) - 1;
         }
 
-        private void WriteTimeListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void listBoxWriteTime_SelectedIndexChanged(object sender, EventArgs e)
         {
-            listBoxBakkups.SelectedIndex = WriteTimeListBox.SelectedIndex;
+            //Issue with ListBox's in Windows Forms. There can be calls here when the number
+            //of selected items is 0. When this happens, do nothing.
+            if (listBoxBakkups.SelectedItems.Count == 0)
+                return;
+
+            listBoxBakkups.SelectedIndex = listBoxWriteTime.SelectedIndex;
 
             selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
             int dotIdx = selectionString.IndexOf(".");
@@ -351,7 +361,7 @@ namespace bakkup
 
             //populate listbox
             listBoxBakkups.DataSource = gameList;
-            WriteTimeListBox.DataSource = WriteTimesList;
+            listBoxWriteTime.DataSource = WriteTimesList;
         }
 
         //auto load checkbox

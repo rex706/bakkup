@@ -32,30 +32,50 @@ namespace bakkup
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            while (SwitchRequest == true || FirstStart == true)
-            {
-                GD = false;
-                OD = false;
-                DB = false;
+            /*
+             * Nkosi Note: Application Run should only be called once in the application. Use properties
+             * in the ServicePickerForm class to detect which service was chosen instead of application
+             * wide singleton variables (public static variables any part of the application can access.)
+             * Singletons should generally be avoided when possible.
+             */
 
-                SwitchRequest = false;
+            ServicePickerForm form = new ServicePickerForm();
+            form.ShowDialog();
+            if (form.SelectedStorageHandler == null)
+                return; //Form was closed and no storage handler was successfully set, so just exit.
+            //TODO: Pass the successfully initialized storage handler to the MainForm and do stuff with it.
+            //Application.Run(new MainForm(args, form.SelectedStorageHandler));
+            Application.Run(new MainForm(args));
 
-                //Application.Run(new TestForm());
-                Application.Run(new ServicePickerForm());
+            //while (GD == false && OD == false && DB == false)
+            //{
+            //    DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            //    if (answer == DialogResult.Cancel)
+            //        return;
 
-                while (GD == false && OD == false && DB == false)
-                {
-                    DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
-                    if (answer == DialogResult.Cancel)
-                        return;
+            //while (SwitchRequest == true || FirstStart == true)
+            //{
+            //    GD = false;
+            //    OD = false;
+            //    DB = false;
+
+            //    SwitchRequest = false;
+
+            //    //Application.Run(new TestForm());
+            //    Application.Run(new ServicePickerForm());
+
+            //while (GD == false && OD == false && DB == false)
+            //{
+            //    DialogResult answer = MessageBox.Show("You must select a cloud provider", "", MessageBoxButtons.OKCancel, MessageBoxIcon.Warning);
+            //    if (answer == DialogResult.Cancel)
+            //        return;
                 
-                    Application.Run(new ServicePickerForm());
-                }
+            //    Application.Run(new ServicePickerForm());
+            //}
 
-                Application.Run(new MainForm(args));
-
-                FirstStart = false;
-            }
         }
     }
 }
+
+
+
