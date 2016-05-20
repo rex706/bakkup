@@ -31,7 +31,7 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.listBoxBakkups = new System.Windows.Forms.ListBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.InfoLabel = new System.Windows.Forms.Label();
             this.buttonSelect = new System.Windows.Forms.Button();
             this.buttonNewBackup = new System.Windows.Forms.Button();
             this.ButtonImageList = new System.Windows.Forms.ImageList(this.components);
@@ -59,15 +59,16 @@
             this.listBoxBakkups.TabIndex = 0;
             this.listBoxBakkups.SelectedIndexChanged += new System.EventHandler(this.listBoxBakkups_SelectedIndexChanged);
             // 
-            // label1
+            // InfoLabel
             // 
-            this.label1.Font = new System.Drawing.Font("Calibri Light", 10F);
-            this.label1.Location = new System.Drawing.Point(85, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(157, 16);
-            this.label1.TabIndex = 1;
-            this.label1.Text = "# bakkups found";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.InfoLabel.Font = new System.Drawing.Font("Calibri Light", 10F);
+            this.InfoLabel.Location = new System.Drawing.Point(85, 9);
+            this.InfoLabel.Name = "InfoLabel";
+            this.InfoLabel.Size = new System.Drawing.Size(157, 16);
+            this.InfoLabel.TabIndex = 1;
+            this.InfoLabel.Text = "# bakkups found";
+            this.InfoLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.InfoLabel.Visible = false;
             // 
             // buttonSelect
             // 
@@ -174,6 +175,7 @@
             this.linkLabelVersion.TabStop = true;
             this.linkLabelVersion.Tag = "";
             this.linkLabelVersion.Text = "v#";
+            this.linkLabelVersion.Visible = false;
             this.linkLabelVersion.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelVersion_LinkClicked);
             // 
             // buttonRemove
@@ -215,6 +217,7 @@
             this.serviceLabel.TabIndex = 16;
             this.serviceLabel.Text = "   ";
             this.toolTip.SetToolTip(this.serviceLabel, "Click to change provider");
+            this.serviceLabel.Visible = false;
             this.serviceLabel.Click += new System.EventHandler(this.serviceLabel_Click);
             // 
             // ServiceImageList
@@ -253,7 +256,7 @@
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.buttonNewBackup);
             this.Controls.Add(this.buttonSelect);
-            this.Controls.Add(this.label1);
+            this.Controls.Add(this.InfoLabel);
             this.Controls.Add(this.listBoxBakkups);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -270,7 +273,7 @@
         #endregion
 
         private System.Windows.Forms.ListBox listBoxBakkups;
-        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label InfoLabel;
         private System.Windows.Forms.Button buttonSelect;
         private System.Windows.Forms.Button buttonNewBackup;
         private System.Windows.Forms.Button buttonRefresh;

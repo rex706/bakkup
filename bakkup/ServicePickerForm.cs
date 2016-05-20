@@ -69,8 +69,7 @@ namespace bakkup
                         var description =
                             string.Format("An error occured while logging into {0}.\n{1}\n{2}\nTry again?",
                                 handler.ProviderName, handler.LastError.ToString(), handler.LastErrorMessage);
-                        var dialogResult = MessageBox.Show(description, "Login Error", MessageBoxButtons.RetryCancel,
-                            MessageBoxIcon.Error);
+                        var dialogResult = MessageBox.Show(description, "Login Error", MessageBoxButtons.RetryCancel, MessageBoxIcon.Error);
                         if (dialogResult == DialogResult.Cancel)
                             return;
                     }
@@ -115,26 +114,8 @@ namespace bakkup
             //that GoogleDriveStorageHandler implements IStorageHandler and eliminate redundant code
             //(OneDrive and DropBox click event code would be the same) and the singletons (GD, DB, OD)
             //in one go.
-            //Program.GD = true;
 
             await LoadStorageHandler(new GoogleDriveStorageHandler());
-
-            //_storageHandler = new GoogleDriveStorageHandler();
-            //if (!await _storageHandler.InitializeHandler())
-            //{
-            //    //Failed to login.
-            //    MessageBox.Show("Failed to login to Google Drive!", "Login Failed", MessageBoxButtons.OK,
-            //        MessageBoxIcon.Exclamation);
-            //    Console.WriteLine("Login Error Occurred:");
-            //    Console.WriteLine(_storageHandler.LastErrorMessage);
-            //}
-            //else
-            //{
-
-            //    //buttonUpload.Enabled = buttonTestFolder.Enabled = true;
-            //}
-
-            //Close();
         }
 
         #endregion
@@ -144,13 +125,13 @@ namespace bakkup
         private void OneDriveButton_MouseEnter(object sender, EventArgs e)
         {
             // ImageList index value for the hover image.
-            //OneDriveButton.ImageIndex = 1;
+            OneDriveButton.ImageIndex = 3;
         }
 
         private void OneDriveButton_MouseLeave(object sender, EventArgs e)
         {
             // ImageList index value for the normal image.
-            //OneDriveButton.ImageIndex = 0;
+            OneDriveButton.ImageIndex = 2;
         }
 
         private void OneDriveButton_Click(object sender, EventArgs e)
@@ -158,8 +139,6 @@ namespace bakkup
             //Nkosi Note: Later, use the same logic as Google Drive.
             //await LoadStorageHandler(new OneDriveStorageHandler());
 
-            //Program.OD = true;
-            //Close();
             MessageBox.Show("Coming Soon");
         }
 
@@ -170,13 +149,13 @@ namespace bakkup
         private void DropBoxButton_MouseEnter(object sender, EventArgs e)
         {
             // ImageList index value for the hover image.
-            //DropBoxButton.ImageIndex = 1;
+            DropBoxButton.ImageIndex = 5;
         }
 
         private void DropBoxButton_MouseLeave(object sender, EventArgs e)
         {
             // ImageList index value for the normal image.
-            //DropBoxButton.ImageIndex = 0;
+            DropBoxButton.ImageIndex = 4;
         }
 
         private void DropBoxButton_Click(object sender, EventArgs e)
@@ -184,8 +163,6 @@ namespace bakkup
             //Nkosi Note: Later, use the same logic as Google Drive.
             //await LoadStorageHandler(new DropBoxStorageHandler());
 
-            //Program.DB = true;
-            //Close();
             MessageBox.Show("Coming Soon");
         }
 
