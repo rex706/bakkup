@@ -56,8 +56,8 @@
             this.imageList.Images.SetKeyName(1, "gdstroke.png");
             this.imageList.Images.SetKeyName(2, "od.png");
             this.imageList.Images.SetKeyName(3, "odstroke.png");
-            this.imageList.Images.SetKeyName(4, "db.png");
-            this.imageList.Images.SetKeyName(5, "dpstroke.png");
+            this.imageList.Images.SetKeyName(4, "dbnoborder.png");
+            this.imageList.Images.SetKeyName(5, "dbstroke2.png");
             // 
             // DropBoxButton
             // 

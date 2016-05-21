@@ -226,7 +226,7 @@
             this.ServiceImageList.TransparentColor = System.Drawing.Color.Transparent;
             this.ServiceImageList.Images.SetKeyName(0, "Google-Drive-icon.png");
             this.ServiceImageList.Images.SetKeyName(1, "42736.png");
-            this.ServiceImageList.Images.SetKeyName(2, "Dropbox.png");
+            this.ServiceImageList.Images.SetKeyName(2, "dbnoborder.png");
             // 
             // listBoxWriteTime
             // 
