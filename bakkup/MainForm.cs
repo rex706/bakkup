@@ -6,17 +6,26 @@ using System.Linq;
 using System.Windows.Forms;
 using Microsoft.VisualBasic;
 using System.Collections.Generic;
+<<<<<<< HEAD
 using System.Threading;
+=======
+using System.Net;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
+using bakkup.StorageHandlers;
+>>>>>>> origin/master
 
 namespace bakkup
 {
     public partial class MainForm : Form
     {
-        //Nkosi Note: None of these variables should be declared public.
+        #region Variables
 
         private string argument = null;
         private bool argFlag = false;
         private bool compareFlag = false;
+        private bool UpdateFound = false;
 
         private string[] gameDirectories;
         private List<string> gameList;
@@ -32,7 +41,14 @@ namespace bakkup
         private string exePath;
         private string parameters;
 
-        //Nkosi Note: UI elements should always have a default constructor that takes no parameters.
+        private static Version latest;
+
+        private IStorageHandler _storageHandler;
+
+        #endregion
+
+        #region Constructors
+
         public MainForm()
         {
             InitializeComponent();
@@ -54,15 +70,71 @@ namespace bakkup
             InitializeComponent();
         }
 
-        private void MainForm_Load(object sender, EventArgs e)
+        #endregion
+
+        #region Window Event Listeners
+
+        private async void MainForm_Load(object sender, EventArgs e)
         {
-            //check for internet
+            //Check for internet
             if (Util.CheckForInternetConnection() == false)
             {
-                DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                DialogResult answer = MessageBox.Show("No Internet connection found! \nSave files cannot be fetched but will still attempt to update on game exit if Auto-Run is enabled. \nThis will overwrite the previous cloud save once connection is established. Play anyway?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                 if (answer == DialogResult.No)
-                    Close(); //Nkosi Note: Closing the window passed to Application.Run will exit the program.
+                    Close();
             }
+
+            var form = new ServicePickerForm();
+
+            //Check for a new version.
+            int updateResult = await CheckForUpdate();
+            if (updateResult == -1)
+            {
+                //Some Error occurred.
+                //TODO: Handle this Error.
+            }
+            else if (updateResult == 1)
+            {
+                //An update is available, but user has chosen not to update.
+                form.SelectProviderLabel.ForeColor = Color.Red;
+                form.SelectProviderLabel.Text = "v" + latest + " update available!";
+                UpdateFound = true;
+            }
+            else if (updateResult == 2)
+            {
+                //An update is available, and the user has chosen to update.
+                //TODO: Exit the application. Later, initiate a process that downloads
+                //new updated binaries.
+                Close();
+            }
+
+            //Show the provider dialog.
+            form.ShowDialog();
+            if (form.SelectedStorageHandler == null)
+            {
+                //Provider window was closed and no storage handler was successfully set, so just exit.
+                Close();
+                return;
+            }
+
+            //Set the new storage handler. It was also initialized 
+            _storageHandler = form.SelectedStorageHandler;
+
+            //Show the image of the currently selected storage handler.
+            switch (_storageHandler.ProviderType)
+            {
+                case StorageProviders.GoogleDrive:
+                    serviceLabel.ImageIndex = 0;
+                    break;
+                case StorageProviders.OneDrive:
+                    serviceLabel.ImageIndex = 1;
+                    break;
+                case StorageProviders.DropBox:
+                    serviceLabel.ImageIndex = 2;
+                    break;
+            }
+
+            linkLabelVersion.Text = "v" + Assembly.GetExecutingAssembly().GetName().Version;
 
             string GooglePath = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "\\Google Drive";
             SavePath = GooglePath + "\\bakkups";
@@ -70,20 +142,18 @@ namespace bakkup
             //make sure google drive directory exists
             if (!Directory.Exists(GooglePath))
             {
-                MessageBox.Show("Could not locate Google Drive directory.\n Make sure it is installed and signed in, then try again.", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //Environment.Exit(0);
-                //Nkosi Note: Closing the window passed to Application.Run will exit the program.
+                MessageBox.Show("Could not locate Google Drive directory.\n Make sure it is installed and signed in, then try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 Close();
             }
 
             //make sure save path exists
             if (!Directory.Exists(SavePath))
             {
-                MessageBox.Show("Could not locate bakkups directory.\nIt will now be created on your Google Drive.", "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show("Could not locate bakkups directory.\nIt will now be created on your Google Drive.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 Directory.CreateDirectory(SavePath);
             }
 
-            refreshList();
+            RefreshList();
 
             //if user input arguments
             if (argFlag == true)
@@ -98,25 +168,49 @@ namespace bakkup
                 }
                 else
                 {
-                    MessageBox.Show("Argument error!\nCould not find directory for desired game:\n\n" + argument.Substring(1), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Argument Error!\nCould not find directory for desired game:\n\n" + argument.Substring(1), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Close();
                 }
             }
+
+            linkLabelVersion.Visible = true;
+            InfoLabel.Visible = true;
+            serviceLabel.Visible = true;
         }
 
         //update current selected item
         private void listBoxBakkups_SelectedIndexChanged(object sender, EventArgs e)
         {
+<<<<<<< HEAD
             WriteTimeListBox.SelectedIndex = listBoxBakkups.SelectedIndex;
+=======
+            //Issue with ListBox's in Windows Forms. There can be calls here when the number
+            //of selected items is 0. When this happens, do nothing.
+            if (listBoxWriteTime.SelectedItems.Count == 0)
+                return;
+
+            listBoxWriteTime.SelectedIndex = listBoxBakkups.SelectedIndex;
+>>>>>>> origin/master
 
             selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
             int dotIdx = selectionString.IndexOf(".");
             selection = Int32.Parse(selectionString.Substring(0, dotIdx)) - 1;
         }
 
+<<<<<<< HEAD
         private void WriteTimeListBox_SelectedIndexChanged(object sender, EventArgs e)
         {
             listBoxBakkups.SelectedIndex = WriteTimeListBox.SelectedIndex;
+=======
+        private void listBoxWriteTime_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Issue with ListBox's in Windows Forms. There can be calls here when the number
+            //of selected items is 0. When this happens, do nothing.
+            if (listBoxBakkups.SelectedItems.Count == 0)
+                return;
+
+            listBoxBakkups.SelectedIndex = listBoxWriteTime.SelectedIndex;
+>>>>>>> origin/master
 
             selectionString = listBoxBakkups.GetItemText(listBoxBakkups.SelectedItem);
             int dotIdx = selectionString.IndexOf(".");
@@ -150,18 +244,18 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                label1.ForeColor = Color.Red;
-                label1.Text = "Local Transfer Failed!";
-                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                InfoLabel.ForeColor = Color.Red;
+                InfoLabel.Text = "Local Transfer Failed!";
+                MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             //copy files to local path
-            label1.ForeColor = Color.Orange;
-            label1.Text = "Copying Files...";
+            InfoLabel.ForeColor = Color.Orange;
+            InfoLabel.Text = "Copying Files...";
             Util.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
-            label1.ForeColor = Color.Green;
-            label1.Text = "Local Transfer Complete!";
+            InfoLabel.ForeColor = Color.Green;
+            InfoLabel.Text = "Local Transfer Complete!";
 
             //get working directory from exePath variable
             int last_slash_idx = exePath.LastIndexOf('\\');
@@ -185,16 +279,16 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             //copy files to google drive
-            label1.ForeColor = Color.Orange;
-            label1.Text = "Copying Files...";
+            InfoLabel.ForeColor = Color.Orange;
+            InfoLabel.Text = "Copying Files...";
             Util.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
-            label1.ForeColor = Color.Green;
-            label1.Text = "Cloud Backup Complete!";
+            InfoLabel.ForeColor = Color.Green;
+            InfoLabel.Text = "Cloud Backup Complete!";
         }
 
         //new
@@ -207,7 +301,7 @@ namespace bakkup
             if (fBrowser.ShowDialog() == DialogResult.OK) localSavePath = fBrowser.SelectedPath;
             else
             {
-                MessageBox.Show("You must select a valid local save directory!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("You must select a valid local save directory!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -220,7 +314,7 @@ namespace bakkup
             if (exeBrowser.ShowDialog() == DialogResult.OK) exePath = exeBrowser.FileName;
             else
             {
-                MessageBox.Show("You must select a valid game exe!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("You must select a valid game exe!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -234,7 +328,7 @@ namespace bakkup
             gameName = Interaction.InputBox("Enter name of Game:", "bakkup", exeName, Width * 2, Height * 2);
             while (gameName.Length < 3)
             {
-                MessageBox.Show("Name must be more than 2 characters long!", "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Name must be more than 2 characters long!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 gameName = Interaction.InputBox("Enter name of Game:", "bakkup", exeName, Width * 2, Height * 2);
             }
 
@@ -247,9 +341,15 @@ namespace bakkup
             {
                 Directory.CreateDirectory(newDir);
             }
+<<<<<<< HEAD
             catch(Exception m)
             {
                 MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+=======
+            catch (Exception m)
+            {
+                MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+>>>>>>> origin/master
                 return;
             }
 
@@ -262,18 +362,19 @@ namespace bakkup
             }
 
             //copy files to google drive
-            label1.ForeColor = Color.Orange;
-            label1.Text = "Copying Files...";
+            InfoLabel.ForeColor = Color.Orange;
+            InfoLabel.Text = "Copying Files...";
             Util.DirectoryCopy(localSavePath, newDir, true);
-            label1.ForeColor = Color.Green;
-            label1.Text = "Cloud Backup Complete!";
+            InfoLabel.ForeColor = Color.Green;
+            InfoLabel.Text = "Cloud Backup Complete!";
 
-            refreshList();
+            RefreshList();
         }
 
         //refresh
         private void buttonRefresh_Click(object sender, EventArgs e)
         {
+<<<<<<< HEAD
             refreshList();
         }
 
@@ -333,6 +434,9 @@ namespace bakkup
             //populate listbox
             listBoxBakkups.DataSource = gameList;
             WriteTimeListBox.DataSource = WriteTimesList;
+=======
+            RefreshList();
+>>>>>>> origin/master
         }
 
         //auto load checkbox
@@ -372,18 +476,18 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                label1.ForeColor = Color.Red;
-                label1.Text = "Local Transfer Failed!";
-                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                InfoLabel.ForeColor = Color.Red;
+                InfoLabel.Text = "Local Transfer Failed!";
+                MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             //copy files to local path
-            label1.ForeColor = Color.Orange;
-            label1.Text = "Copying Files...";
+            InfoLabel.ForeColor = Color.Orange;
+            InfoLabel.Text = "Copying Files...";
             Util.DirectoryCopy(SavePath + "\\" + gameName, localSavePath, true);
-            label1.ForeColor = Color.Green;
-            label1.Text = "Local Transfer Complete!";
+            InfoLabel.ForeColor = Color.Green;
+            InfoLabel.Text = "Local Transfer Complete!";
         }
 
         //backup
@@ -404,18 +508,18 @@ namespace bakkup
             }
             catch (Exception m)
             {
-                label1.ForeColor = Color.Red;
-                label1.Text = "Cloud Backup Failed!";
-                MessageBox.Show(m.Message, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                InfoLabel.ForeColor = Color.Red;
+                InfoLabel.Text = "Cloud Backup Failed!";
+                MessageBox.Show(m.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             //copy files to google drive
-            label1.ForeColor = Color.Orange;
-            label1.Text = "Copying Files...";
+            InfoLabel.ForeColor = Color.Orange;
+            InfoLabel.Text = "Copying Files...";
             Util.DirectoryCopy(localSavePath, SavePath + "\\" + gameName, true);
-            label1.ForeColor = Color.Green;
-            label1.Text = "Cloud Backup Complete!";
+            InfoLabel.ForeColor = Color.Green;
+            InfoLabel.Text = "Cloud Backup Complete!";
         }
 
         //version number click
@@ -428,7 +532,7 @@ namespace bakkup
         //remove
         private void buttonRemove_Click(object sender, EventArgs e)
         {
-            DialogResult answer = MessageBox.Show("Are you sure you want to permanently delete this entry?", "WARNING", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+            DialogResult answer = MessageBox.Show("Are you sure you want to permanently delete this entry?", "Warning", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 
             //if yes, delete
             if (answer == DialogResult.Yes)
@@ -438,8 +542,188 @@ namespace bakkup
 
                 Directory.Delete(SavePath + "\\" + gameName, true);
 
-                refreshList();
+                RefreshList();
+            }
+            else
+                return;
+        }
+
+        //button up/down events to simulate click down animation
+        private void buttonRefresh_MouseDown(object sender, MouseEventArgs e)
+        {
+            buttonRefresh.ImageIndex = 3;
+        }
+
+        private void buttonRefresh_MouseUp(object sender, MouseEventArgs e)
+        {
+            buttonRefresh.ImageIndex = 0;
+        }
+
+        private void buttonNewBackup_MouseDown(object sender, MouseEventArgs e)
+        {
+            buttonNewBackup.ImageIndex = 4;
+        }
+
+        private void buttonNewBackup_Mouseup(object sender, MouseEventArgs e)
+        {
+            buttonNewBackup.ImageIndex = 1;
+        }
+
+        private void buttonRemove_MouseDown(object sender, MouseEventArgs e)
+        {
+            buttonRemove.ImageIndex = 5;
+        }
+
+        private void buttonRemove_Mouseup(object sender, MouseEventArgs e)
+        {
+            buttonRemove.ImageIndex = 2;
+        }
+
+        private async void serviceLabel_Click(object sender, EventArgs e)
+        {
+            //Show the service provider selector window.
+            var window = new ServicePickerForm();
+            window.LoadedProvider = _storageHandler.ProviderType;
+
+            if(UpdateFound == true)
+            {
+                window.SelectProviderLabel.ForeColor = Color.Red;
+                window.SelectProviderLabel.Text = "v" + latest + " update available!";
+            }
+
+            window.ShowDialog();
+            //Do nothing if either no service provider was selected, or the service provider
+            //is the same as the currently loaded provider. This way, the current storage
+            //handler remains loaded and its state is maintained.
+            if (window.SelectedStorageHandler == null ||
+                window.SelectedStorageHandler.ProviderType == _storageHandler.ProviderType)
+                return;
+
+            //Cleanup the current storage handler.
+
+            //Initialize the newly selected storage handler.
+
+            //Reload the Mainform with the new storage handler data.
+
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        //Checks if an update is available. 
+        //-1 for check Error, 0 for no update, 1 for update is available, 2 for perform update.
+        private static async Task<int> CheckForUpdate()
+        {
+            //Nkosi Note: Always use asynchronous versions of network and IO methods.
+
+            //Check for version updates
+            var client = new HttpClient();
+            client.Timeout = new TimeSpan(0, 0, 0, 10);
+            try
+            {
+                //open the text file using a stream reader
+                using (Stream stream = await client.GetStreamAsync("http://textuploader.com/5bjaq/raw"))
+                {
+                    Version current = Assembly.GetExecutingAssembly().GetName().Version;
+                    StreamReader reader = new StreamReader(stream);
+                    latest = Version.Parse(reader.ReadToEnd());
+
+                    if (latest != current)
+                    {
+                        DialogResult answer = MessageBox.Show("A new version of bakkup is available!\n\nCurrent Version     " + current + "\nLatest Version     " + latest + "\n\nUpdate Now?", "bakkup Update", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                        if (answer == DialogResult.Yes)
+                        {
+                            //TODO: Later on, remove this and replace with automated process of downloading new binaries.
+                            Process.Start("https://github.com/rex706/bakkup");
+                            //Update is available, and user wants to update. Requires app to close.
+                            return 2;
+                        }
+                        //Update is available, but user chose not to update just yet.
+                        return 1;
+                    }
+                }
+
+                //No update available.
+                return 0;
+            }
+            catch (Exception m)
+            {
+                MessageBox.Show("Failed to check for update.\n" + m.Message,
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return -1;
             }
         }
+
+        //refresh and populate listbox
+        private void RefreshList()
+        {
+            gameDirectories = Directory.GetDirectories(SavePath);
+            string[] games = new string[gameDirectories.Length];
+            string[] WriteTimes = new string[gameDirectories.Length];
+            int valid = 0;
+
+            //get the folder names instead of the entire path string and check if a bakkup.txt exists to be valid
+            for (int i = 0; i < gameDirectories.Length; i++)
+            {
+                if (File.Exists(gameDirectories[i] + "\\bakkup.txt"))
+                {
+                    valid++;
+                    games[i] = gameDirectories[i].Split(new char[] { Path.DirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries).Last();
+                    games[i] = (valid) + ". " + games[i];
+
+                    //look through all the files in the current path and get the most recent last write date
+                    string[] fileEntries = Directory.GetFiles(gameDirectories[i]);
+                    for (int j = 0; j < fileEntries.Length; j++)
+                    {
+                        DateTime ftime = File.GetLastWriteTime(fileEntries[0]);
+                        DateTime ftime2 = File.GetLastWriteTime(fileEntries[j]);
+
+                        if (ftime < ftime2)
+                            fileEntries[0] = fileEntries[j];
+                    }
+
+                    WriteTimes[i] = Directory.GetLastWriteTime(fileEntries[0]).ToString();
+                }
+                else
+                {
+                    games[i] = "@@@";
+                    WriteTimes[i] = "@@@";
+                }
+            }
+
+            gameList = new List<string>(games);
+            gameList.RemoveAll(item => item == "@@@");
+
+            WriteTimesList = new List<string>(WriteTimes);
+            WriteTimesList.RemoveAll(item => item == "@@@");
+
+            //display number of games found
+            InfoLabel.ForeColor = Color.Blue;
+            if (gameList.Count > 1)
+            {
+                InfoLabel.Text = gameList.Count + " bakkups found!";
+                buttonSelect.Enabled = true;
+                checkBoxAutoRun.Enabled = true;
+            }
+            else if (gameList.Count == 0)
+            {
+                InfoLabel.Text = "No bakkups found!";
+                buttonSelect.Enabled = false;
+                checkBoxAutoRun.Enabled = false;
+            }
+            else
+            {
+                InfoLabel.Text = gameList.Count + " bakkup found!";
+                buttonSelect.Enabled = true;
+                checkBoxAutoRun.Enabled = true;
+            }
+
+            //populate listbox
+            listBoxBakkups.DataSource = gameList;
+            listBoxWriteTime.DataSource = WriteTimesList;
+        }
+
+        #endregion
     }
 }

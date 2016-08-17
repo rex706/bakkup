@@ -7,27 +7,48 @@
  */
 
 using System;
+<<<<<<< HEAD
+=======
+using System.Diagnostics;
+using System.Drawing;
+using System.IO;
+using System.Net.Http;
+using System.Reflection;
+using System.Threading.Tasks;
+>>>>>>> origin/master
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 namespace bakkup
 {
-    static class Program
+    internal static class Program
     {
-        /// <summary>
-        /// Copies save files to and from a Google Drive folder to keep saves up to date and accessable from anywhere.
-        /// </summary>
 
         public static bool GD = false;
         public static bool DB = false;
         public static bool OD = false;
 
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+<<<<<<< HEAD
             Application.Run(new ServicePickerForm());
+=======
+
+            /*
+             * Nkosi Note: Application Run should only be called once in the application. Use properties
+             * in the ServicePickerForm class to detect which service was chosen instead of application
+             * wide singleton variables (public static variables any part of the application can access.)
+             * Singletons should generally be avoided when possible.
+             */
+
+>>>>>>> origin/master
             Application.Run(new MainForm(args));
         }
     }
 }
+
+
+

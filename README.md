@@ -3,7 +3,7 @@ Automatically backup game saves to a Google Drive folder to be accessed from any
 
 Latest version: 1.5
 
-![alt tag](http://i.imgur.com/BEAhMrR.png)!  [alt tag](http://i.imgur.com/BBr4fuG.png)
+![alt tag](http://i.imgur.com/BEAhMrR.png)  ![alt tag](http://i.imgur.com/BBr4fuG.png)
 
 [Download](https://drive.google.com/file/d/0BzKq8PEZkdhSall0NVRlOW03Q1U/view?usp=sharing)
 
